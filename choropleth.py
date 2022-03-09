@@ -3,10 +3,10 @@ import plotly.express as px
 import pandas as pd
 from urllib.request import urlopen
 
-df = pd.read_csv("maps/data/School_Locations_SY1718.csv", dtype={"COMMAREA": str})
+df = pd.read_csv("data/School_Locations_SY1718.csv", dtype={"COMMAREA": str})
 df = df.fillna(999)
 
-with open("maps/data/chicago_boundaries.geojson") as f:
+with open("data/chicago_boundaries.geojson") as f:
     jsn = json.load(f)
 
 for i in range(len(jsn["features"])):
