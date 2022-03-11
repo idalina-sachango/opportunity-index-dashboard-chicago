@@ -49,10 +49,11 @@ for row in full.itertuples():
     lon = [row[63]],
     lat = [row[66]],
     marker = dict(
-            size = row[16]/30,
+            #size = row[16]/30,
+            color="red",
             line_color='rgb(40,40,40)',
             line_width=0.5,
-            sizemode = 'area'
+            #sizemode = 'area'
         )
     ))
 
