@@ -1,8 +1,9 @@
 # proj-tools4schools
-proj-tools4schools created by GitHub Classroom
+Final Project for CAPP122
 
 
-## Motivations
+
+### Motivations
 
 Our team is interested in exploring inequity in the Chicago school system. We analyze factors that impact high school graduation rates and other measures of college readiness.  Our goal was to develop an index at the school-level that measures a student’s level of opportunity.  We then compare our constructed index with college enrollment rates to validate our results.  Our index considers factors such as school environment, economic hardship, crime, housing security, access to nutrition, access to the internet, and school budget allocation.  We hope that education institutions can utilize our index and analysis to effectively allocate resources and support students’ learning needs. 
 
