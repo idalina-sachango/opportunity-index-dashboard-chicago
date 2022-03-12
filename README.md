@@ -1,5 +1,5 @@
 # proj-tools4schools
-proj-tools4schools created by GitHub Classroom
+Final Project for CAPP122
 
 # Team
 Akila Forde, Dharini Ramaswamy, Idalina Sachango, Nivedita Vatsa
