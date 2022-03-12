@@ -4,6 +4,7 @@ click==8.0.4
 click-plugins==1.1.1
 cligj==0.7.2
 cycler==0.11.0
+dash==2.2.0
 Fiona==1.8.21
 fonttools==4.29.1
 geopandas==0.10.2
@@ -13,6 +14,7 @@ munch==2.5.0
 numpy==1.22.2
 packaging==21.3
 pandas==1.4.1
+pathlib==1.0.1
 Pillow==9.0.1
 pygeos==0.12.0
 pyparsing==3.0.7
