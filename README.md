@@ -1,10 +1,13 @@
 # proj-tools4schools
 proj-tools4schools created by GitHub Classroom
 
+# Team
+Akila Forde, Dharini Ramaswamy, Idalina Sachango, Nivedita Vatsa
 
-# Data To-Do
+# To Run package
 
-1. Get TIGRIS data
-2. Merge CPS data on crosswalk from School_ID/LEAID
-3. Read Doc for Oppurtunity Index
+1. ```bash install.sh``` - will open a virtual environment, load necessary packages and run api data code
+2. run ```python -m tools4schools``` - will open the Dash app
+
+
 
