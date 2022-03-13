@@ -54,11 +54,12 @@ def make_fig():
     #plot bubbles with cps college data
     for _, row in full.iterrows():
         fig.add_trace(go.Scattergeo(
+        print(row.pctenroll17/100),
         lon = [row.long],
         lat = [row.lat],
         marker = dict(
             size = row.pctenroll17/100,
-            line_color='red',
+            line_color='rgb(40,40,40)',
             line_width=0.5,
             sizemode = 'area'
             )

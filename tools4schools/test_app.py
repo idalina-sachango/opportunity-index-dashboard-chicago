@@ -3,7 +3,7 @@ import dash
 from dash import dcc
 from dash import  html
 from dash.dependencies import Input, Output
-from tools4schools.charts import scatter
+from tools4schools.charts import scatter, air_pollution
 
 
 external_stylesheets = [
@@ -19,6 +19,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 ### Figure 1
 scatter_fig = scatter.make_fig()
+air_pollution_fig = air_pollution.make_fig()
 
 
 ### App Title
@@ -40,10 +41,21 @@ app.layout = html.Div(
         html.Div(
             children = [
                 html.Div(
-                    children = ['Map Title',
+                    children = ['College enrollment by school',
                         dcc.Graph(
-                            id = 'Map Choropleth',
+                            id = 'Map scatter',
                             figure = scatter_fig),],
+                    className="card",
+                ),
+                ],
+        className="wrapper",),
+        html.Div(
+            children = [
+                html.Div(
+                    children = ['Heat map of air pollution',
+                        dcc.Graph(
+                            id = 'Map choropleth',
+                            figure = air_pollution_fig),],
                     className="card",
                 ),
                 ],
