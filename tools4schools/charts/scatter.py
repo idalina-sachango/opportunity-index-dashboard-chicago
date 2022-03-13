@@ -10,31 +10,21 @@ def make_fig():
     home_path = Path(__file__).parent.parent
     data_path = home_path.joinpath("data")
     data_path_geo = home_path.joinpath("data/geojson")
-    
 
-    bounds_chi = pd.read_csv(data_path.joinpath("cps-comarea-bounds.csv"), dtype={"Zip": str})
 
-    # zipcodes geo
-    with open(data_path_geo.joinpath("zipcodes.geojson")) as f:
-        coms = json.load(f)
-    for i in range(len(coms["features"])):
-        coms["features"][i]["id"] = coms["features"][i]["properties"]["zip"]
+    def open_path(filename, feature):
+        with open(data_path_geo.joinpath(filename)) as f:
+            df = json.load(f)
+        for i in range(len(df["features"])):
+            df["features"][i]["id"] = df["features"][i]["properties"][feature]
+        return df
 
-    # cps location geo
-    with open(data_path_geo.joinpath("cps-geojson.geojson")) as f:
-        jsn = json.load(f)
-    for i in range(len(jsn["features"])):
-        jsn["features"][i]["id"] = jsn["features"][i]["properties"]["school_id"]
+    cps_locations = open_path("cps-geojson.geojson", "school_id")
+    census_tract = open_path("census_tract.geojson", "geoid10")
 
-    # census tract geo
-    with open(data_path_geo.joinpath("census_tract.geojson")) as f:
-        census = json.load(f)
-    for i in range(len(jsn["features"])):
-        census["features"][i]["id"] = census["features"][i]["properties"]["geoid10"]
 
-    cps_bounds = json_normalize(jsn["features"])
+    cps_bounds = json_normalize(cps_locations["features"])
     coords = 'geometry.coordinates'
-
     df = (cps_bounds[coords].apply(lambda r: [(r[0],r[1])])
             .apply(pd.Series).stack()
             .reset_index(level=1).rename(columns={0:coords,"level_1":"point"})
@@ -60,27 +50,23 @@ def make_fig():
 
     colors = ["royalblue","crimson","lightseagreen","orange","lightgrey"]
     fig = go.Figure()
-    r, col = full.shape
-    sm = sum(full["grad17"])
 
-    # plot bubbles with cps college data
-    for row in full.itertuples():
+    #plot bubbles with cps college data
+    for _, row in full.iterrows():
         fig.add_trace(go.Scattergeo(
-        lon = [row[63]],
-        lat = [row[66]],
-        fill=True,
-        fillcolor='purple',
+        lon = [row.long],
+        lat = [row.lat],
         marker = dict(
-                size = row[16]/30,
-                line_color='purple',
-                line_width=0.5,
-                sizemode = 'area'
+            size = row.pctenroll17/100,
+            line_color='red',
+            line_width=0.5,
+            sizemode = 'area'
             )
         ))
 
     # draw census tract boundaries
     fig.add_trace(go.Choropleth(
-        geojson=census,
+        geojson=census_tract,
         featureidkey="properties.geoid10",
         locations=df3["ctfips"],
         z = df3["blank_bounds"]
