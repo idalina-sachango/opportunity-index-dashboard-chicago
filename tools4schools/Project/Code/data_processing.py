@@ -4,6 +4,7 @@ Nivedita Vatsa
 
 Consolidate Datasets
 '''
+from concurrent.futures import process
 import numpy as np
 import pandas as pd
 import requests
@@ -55,19 +56,26 @@ def scale_var(dat, var_to_scale, scaling_var, per_unit = 1):
         e.g., when set to 1000, this gives the rate of
         'var_to_scale' per 1000 units of 'scaling_var'.
 
-    Returns: Nothing. Updates dataframe in place.
+    Returns: Nothing. Re-scales variable in place.
     '''
     dat[var_to_scale] = (per_unit * dat[var_to_scale]) / dat[scaling_var]
 
 
 def scale_df(dat, to_scale_dict, scaler_dict):
     '''
-    xx
+    Scale all variables in need of scaling by an appropriate
+    scaling variable.
+
+    Inputs:
+    - dat: A Pandas dataframe.
+    - to_scale_dict: Dictionary mapping a scaling specification
+        to a list of variables to scale.
+    - scaler_dict: Dictionary mapping a scaling specification
+        to a scaling variable.
+    
+    Returns: Nothing. Re-scales dataframe in place.
     '''
     for scaler_spec, scaler_var in scaler_dict.items():
-        print("scaler spec:", scaler_spec)
-        print("scaler var:", scaler_var)
-        print("var to scale:", to_scale_dict[scaler_spec])
         for var in to_scale_dict[scaler_spec]:
             scale_var(dat, var, scaler_var)
 
@@ -78,12 +86,24 @@ def impute_w_mean(dat, var_to_impute):
 
     Inputs:
     - dat: A Pandas dataframe
-    - var_to_impute: variable for which to impute missing values
+    - var_to_impute (str): variable for which to impute missing values
 
     Returns: Nothing.  Updates dataframe in place.
     '''
     dat[var_to_impute].fillna((dat[var_to_impute].mean()), inplace=True)
 
+
+def process_fips(dat):
+    '''
+    '''
+    fips_len = {'state': '2', 'county': '3', 'tract': '6'}
+    for var, target_len in fips_len.items():
+        set_format = ["{0:0>", target_len, "}"]
+        dat[var] = dat[var].apply(lambda x: ''.join(set_format).format(x))
+    dat['census_tract'] = dat[fips_len.keys()].apply(lambda row:
+                                ''.join(row.values.astype(str)),
+                                axis=1)
+ 
 # IMPORT: CPS Crosswalk
 r = requests.get("https://data.cityofchicago.org/resource/c7jj-qjvh.json")
 cps_cw_json = r.json()
@@ -148,22 +168,23 @@ crdc['ncessch'] = crdc['ncessch'].astype(str)
 
 print(len(crdc['ncessch'].unique()))
 print(crdc.shape)
-#consolidated = pd.merge(consolidated, crdc, how = "left", on = "ncessch", indicator = True)
 consolidated = pd.merge(consolidated, crdc, how = "inner", on = "ncessch", indicator = True)
 consolidated.rename(columns = {'_merge':'crdc_not_matched'}, inplace = True)
 consolidated.to_csv(out_dir + 'crdc_ccd_cps.csv', index = False)
 
 # MERGE: American Community Survey Data
 acs = pd.read_csv(data_dir + 'ACS/acs_data_1.csv')
-acs['tract'] = acs['tract'].apply(lambda x: '{0:0>6}'.format(x))
-acs['county'] = acs['county'].apply(lambda x: '{0:0>3}'.format(x))
-census_vars = ['state', 'county', 'tract']
-acs['census_tract'] = acs[census_vars].apply(lambda row: ''.join(row.values.astype(str)), axis=1)
+process_fips(acs)
+#add_leading_zeroes(acs, 'tract', 6)
+#add_leading_zeroes(acs, 'county', 3)
+
+# create census tract fips code
+#census_vars = ['state', 'county', 'tract']
+#acs['census_tract'] = acs[census_vars].apply(lambda row: ''.join(row.values.astype(str)), axis=1)
 
 print(len(acs['census_tract'].unique()))
 print(acs.shape)
 acs_vars_to_keep = ['tot_hhld', 'internet_rate', 'emp_rate_25_64', 'above_pov_rate', 'census_tract']
-#consolidated = pd.merge(consolidated, acs[acs_vars_to_keep], how = "left", left_on = "census_tract_cps", right_on = "census_tract", indicator = True)
 consolidated = pd.merge(consolidated, acs[acs_vars_to_keep], how = "inner", left_on = "census_tract_cps", right_on = "census_tract", indicator = True)
 consolidated.rename(columns = {'_merge':'acs_not_matched'}, inplace = True)
 consolidated.rename(columns = {'tot_hhld':'tot_hhld_census_tract'}, inplace = True)
@@ -171,20 +192,22 @@ consolidated.rename(columns = {'tot_hhld':'tot_hhld_census_tract'}, inplace = Tr
 # MERGE: School budgets
 cps_budgets = pd.read_csv(data_dir + 'CPS/cps_budgets_2017.csv')
 consolidated['oracleid_cps'] = consolidated['oracleid_cps'].str.rstrip(".0")
-#consolidated = pd.merge(consolidated, cps_budgets, how = "left", left_on = "oracleid_cps", right_on = "oracle_id", indicator = True)
 consolidated = pd.merge(consolidated, cps_budgets, how = "inner", left_on = "oracleid_cps", right_on = "oracle_id", indicator = True)
 consolidated.rename(columns = {'_merge':'cps_budget_not_in_cps_col_enrl'}, inplace = True)
 
 # MERGE: Food stamps
 inc_fs = pd.read_csv(data_dir + 'Economic/income_food_stamps.csv')
-inc_fs['tract'] = inc_fs['tract'].apply(lambda x: '{0:0>6}'.format(x)) #REPEATED CODE !!!
-inc_fs['county'] = inc_fs['county'].apply(lambda x: '{0:0>3}'.format(x))
-census_vars = ['state', 'county', 'tract'] 
-inc_fs['census_tract'] = inc_fs[census_vars].apply(lambda row: ''.join(row.values.astype(str)), axis=1)
+process_fips(inc_fs)
+#add_leading_zeroes(inc_fs, 'tract', 6)
+#add_leading_zeroes(inc_fs, 'county', 3)
+
+#inc_fs['tract'] = inc_fs['tract'].apply(lambda x: '{0:0>6}'.format(x)) #REPEATED CODE !!!
+#inc_fs['county'] = inc_fs['county'].apply(lambda x: '{0:0>3}'.format(x))
+#census_vars = ['state', 'county', 'tract'] 
+#inc_fs['census_tract'] = inc_fs[census_vars].apply(lambda row: ''.join(row.values.astype(str)), axis=1)
 
 print(len(inc_fs['census_tract'].unique()))
 print(inc_fs.shape)
-#consolidated = pd.merge(consolidated, inc_fs[['food_stamps', 'median_earnings', 'census_tract']], how = 'left', left_on = 'census_tract_cps', right_on = 'census_tract', indicator = True)
 consolidated = pd.merge(consolidated, inc_fs[['food_stamps', 'median_earnings', 'census_tract']], how = 'inner', left_on = 'census_tract_cps', right_on = 'census_tract', indicator = True)
 consolidated.rename(columns = {'_merge':'inc_fs_not_matched'}, inplace = True)
 
@@ -195,19 +218,13 @@ aqi = aqi[aqi['date'] == '01JAN2016']
 
 print(len(aqi['ctfips'].unique()))
 print(aqi.shape)
-#consolidated = pd.merge(consolidated, aqi, how = 'left', left_on = 'census_tract_cps', right_on = 'ctfips', indicator = True)
 consolidated = pd.merge(consolidated, aqi, how = 'inner', left_on = 'census_tract_cps', right_on = 'ctfips', indicator = True)
 consolidated.rename(columns = {'_merge':'aqi_not_matched'}, inplace = True)
 #consolidated.columns =consolidated.columns.str.rstrip("_x")
 
 # MERGE: Crime
 
-# VARIABLE LIST
-# id_lst = ['School ID', 'School Name', 'ncessch', 'school_id',
-#     'school_name_x', 'leaid_x', 'street_mailing', 'city_mailing',
-#     'state_mailing', 'zip_mailing', 'street_location', 'city_location',
-#     'state_location', 'zip_location', 'latitude_x', 'longitude_x',
-#     'census_tract_x']
+# VARIABLE LISTS & DICTIONARIES
 
 id_vars = ['School ID', 'School Name', 'ncessch', 'school_id',
     'school_name_x', 'leaid_x', 'latitude_x', 'longitude_x',
@@ -234,57 +251,32 @@ indicator_lst = sum(list(to_scale_dict.values()), [])
 scaler_dict = {"teacher_count": 'teachers_certified_fte_crdc',
                "student_count": "enrollment_crdc",
                "census_households": "tot_hhld_census_tract"}
-#scaling_vars = ['hs_graduates', 'enrollment_crdc', 'tot_hhld_census_tract']
-# ind_lst = ['above_pov_rate', 'internet_rate',
-#            'emp_rate_25_64', 'median_earnings', 'ds_pm_pred']
-
-# to_scale_school_level = ['free_or_reduced_price_lunch', 'teachers_certified_fte_crdc',
-#            'counselors_fte_crdc', 'law_enforcement_fte_crdc',
-#            'salaries_crdc', 'enrl_AP_crdc','FY 2017 Ending Budget']
-# to_scale_census_tract = ['food_stamps']
-
-# CONSOLIDATE
-#consolidated = consolidated[id_lst + scaling_vars + outcome_lst + ind_lst]
-#consolidated.to_csv(out_dir + 'working_df.csv', index = False)
 
 # EXPORT RAW DATA (UNSCALED)
 indicators_by_school_unscaled = consolidated[id_vars + outcome_var + indicator_lst]
-indicators_by_school_unscaled.to_csv(out_dir + 'indicators_by_school_unscaled.csv', index = False)
+indicators_by_school_unscaled.to_csv(out_dir + 'indicators_by_school_unscaled2.csv', index = False)
 
 # SCALE
-
-# Scale school-level variables by school enrollment
 scale_df(consolidated, to_scale_dict, scaler_dict)
-
-# for var in to_scale_dict["student_count"]:
-#     scale_var(consolidated, var, scaler_dict["student_count"])
-
-# # Scale census tract-level variables by the number of households
-# for var in to_scale_census_tract:
-#     scale_var(consolidated, var, 'tot_hhld_census_tract')
-
-# # Scale teacher salaries by the number of teachers
-# scale_var(consolidated, 'salaries_crdc', 'teachers_certified_fte_crdc')
-
 
 # EXPORT RAW DATA (SCALED)
 indicators_by_school_scaled = consolidated[id_vars + outcome_var + indicator_lst]
-indicators_by_school_scaled.to_csv(out_dir + 'indicators_by_school_scaled.csv', index = False)
+indicators_by_school_scaled.to_csv(out_dir + 'indicators_by_school_scaled2.csv', index = False)
 
 # IMPUTE MISSING VALUES
-for var in ind_lst:
+for var in indicator_lst:
     impute_w_mean(consolidated, var)
 
 # STANDARDIZE
-consolidated[ind_lst + outcome_lst] = StandardScaler().fit_transform(consolidated[ind_lst + outcome_lst])
+to_std = indicator_lst + outcome_var
+consolidated[to_std] = StandardScaler().fit_transform(consolidated[to_std])
 
 # CALCULATE INDEX
-consolidated['opportunity_index'] = consolidated[ind_lst].mean(axis=1)
+consolidated['opportunity_index'] = consolidated[indicator_lst].mean(axis=1)
 
 # EXPORT INDEX
-opportunity_index = consolidated[id_lst_abbrev + outcome_lst + ['opportunity_index']]
+opportunity_index = consolidated[id_vars + outcome_var + ['opportunity_index']]
 opportunity_index.to_csv(out_dir + 'opportunity_index_by_school_scaled.csv', index = False)
-#consolidated.to_csv(out_dir + 'consolidated.csv', index = False)
 
 
 
