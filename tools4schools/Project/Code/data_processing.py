@@ -9,7 +9,7 @@ import pandas as pd
 import requests
 from sklearn.preprocessing import StandardScaler
 
-#Set personal directory
+#Set directories
 data_dir = "../Data/"
 out_dir = "../Output/"
 
@@ -40,7 +40,7 @@ def is_unique_id(dat, m_var, left_dat):
         print("Stop! Merging dataset is NOT uniquely identified by merging variables")
  
 
-def scale(dat, var_to_scale, scaling_var, per_unit = 1):
+def scale_var(dat, var_to_scale, scaling_var, per_unit = 1):
     '''
     Scales a given variable by another variable.  For example,
     the number of students enrolled in the free / reduced-price
@@ -60,6 +60,18 @@ def scale(dat, var_to_scale, scaling_var, per_unit = 1):
     dat[var_to_scale] = (per_unit * dat[var_to_scale]) / dat[scaling_var]
 
 
+def scale_df(dat, to_scale_dict, scaler_dict):
+    '''
+    xx
+    '''
+    for scaler_spec, scaler_var in scaler_dict.items():
+        print("scaler spec:", scaler_spec)
+        print("scaler var:", scaler_var)
+        print("var to scale:", to_scale_dict[scaler_spec])
+        for var in to_scale_dict[scaler_spec]:
+            scale_var(dat, var, scaler_var)
+
+
 def impute_w_mean(dat, var_to_impute):
     '''
     Impute missing values with mean value.
@@ -70,7 +82,7 @@ def impute_w_mean(dat, var_to_impute):
 
     Returns: Nothing.  Updates dataframe in place.
     '''
-    consolidated[var_to_impute].fillna((consolidated[var_to_impute].mean()), inplace=True)
+    dat[var_to_impute].fillna((dat[var_to_impute].mean()), inplace=True)
 
 # IMPORT: CPS Crosswalk
 r = requests.get("https://data.cityofchicago.org/resource/c7jj-qjvh.json")
@@ -186,59 +198,93 @@ print(aqi.shape)
 #consolidated = pd.merge(consolidated, aqi, how = 'left', left_on = 'census_tract_cps', right_on = 'ctfips', indicator = True)
 consolidated = pd.merge(consolidated, aqi, how = 'inner', left_on = 'census_tract_cps', right_on = 'ctfips', indicator = True)
 consolidated.rename(columns = {'_merge':'aqi_not_matched'}, inplace = True)
+#consolidated.columns =consolidated.columns.str.rstrip("_x")
 
-# EXPORT
-#consolidated.to_csv(out_dir + 'consolidated.csv', index = False)
+# MERGE: Crime
 
 # VARIABLE LIST
-id_lst = ['School ID', 'School Name', 'ncessch', 'school_id',
-    'school_name_x', 'leaid_x', 'street_mailing', 'city_mailing',
-    'state_mailing', 'zip_mailing', 'street_location', 'city_location',
-    'state_location', 'zip_location', 'latitude_x', 'longitude_x',
+# id_lst = ['School ID', 'School Name', 'ncessch', 'school_id',
+#     'school_name_x', 'leaid_x', 'street_mailing', 'city_mailing',
+#     'state_mailing', 'zip_mailing', 'street_location', 'city_location',
+#     'state_location', 'zip_location', 'latitude_x', 'longitude_x',
+#     'census_tract_x']
+
+id_vars = ['School ID', 'School Name', 'ncessch', 'school_id',
+    'school_name_x', 'leaid_x', 'latitude_x', 'longitude_x',
     'census_tract_x']
 
-outcome_lst = ['college_enrollment', 'college_enrollment_pct']
-scaling_vars = ['hs_graduates', 'enrollment_crdc', 'tot_hhld_census_tract']
-ind_lst = ['free_or_reduced_price_lunch', 'teachers_certified_fte_crdc',
-           'counselors_fte_crdc', 'law_enforcement_fte_crdc',
-           'salaries_crdc', 'enrl_AP_crdc', 'above_pov_rate', 'internet_rate',
-           'emp_rate_25_64', 'FY 2017 Ending Budget',
-           'food_stamps', 'median_earnings', 'ds_pm_pred']
+outcome_var = ['college_enrollment_pct']
+to_scale_dict = {"teacher_count" : ['salaries_crdc'],
+                 "student_count" : ['free_or_reduced_price_lunch',
+                                    'teachers_certified_fte_crdc',
+                                    'counselors_fte_crdc',
+                                    'law_enforcement_fte_crdc',
+                                    'enrl_AP_crdc',
+                                    'FY 2017 Ending Budget'],
+                 "census_households": ['food_stamps'],
+                 "no_scaling": ['above_pov_rate',
+                                'internet_rate',
+                                'emp_rate_25_64',
+                                'median_earnings',
+                                'ds_pm_pred']}
 
-to_scale_school_level = ['free_or_reduced_price_lunch', 'teachers_certified_fte_crdc',
-           'counselors_fte_crdc', 'law_enforcement_fte_crdc',
-           'salaries_crdc', 'enrl_AP_crdc','FY 2017 Ending Budget']
-to_scale_census_tract = ['food_stamps']
-inverse_rel_lst = ['free_or_reduced_price_lunch', 'food_stamps', 'ds_pm_pred'] #law enforcement?
+indicator_lst = sum(list(to_scale_dict.values()), [])
+
+
+scaler_dict = {"teacher_count": 'teachers_certified_fte_crdc',
+               "student_count": "enrollment_crdc",
+               "census_households": "tot_hhld_census_tract"}
+#scaling_vars = ['hs_graduates', 'enrollment_crdc', 'tot_hhld_census_tract']
+# ind_lst = ['above_pov_rate', 'internet_rate',
+#            'emp_rate_25_64', 'median_earnings', 'ds_pm_pred']
+
+# to_scale_school_level = ['free_or_reduced_price_lunch', 'teachers_certified_fte_crdc',
+#            'counselors_fte_crdc', 'law_enforcement_fte_crdc',
+#            'salaries_crdc', 'enrl_AP_crdc','FY 2017 Ending Budget']
+# to_scale_census_tract = ['food_stamps']
 
 # CONSOLIDATE
-consolidated = consolidated[id_lst + scaling_vars + outcome_lst + ind_lst]
-consolidated.to_csv(out_dir + 'working_df.csv', index = False)
+#consolidated = consolidated[id_lst + scaling_vars + outcome_lst + ind_lst]
+#consolidated.to_csv(out_dir + 'working_df.csv', index = False)
 
+# EXPORT RAW DATA (UNSCALED)
+indicators_by_school_unscaled = consolidated[id_vars + outcome_var + indicator_lst]
+indicators_by_school_unscaled.to_csv(out_dir + 'indicators_by_school_unscaled.csv', index = False)
 
 # SCALE
 
 # Scale school-level variables by school enrollment
-for var in to_scale_school_level:
-    scale(consolidated, var, 'enrollment_crdc')
+scale_df(consolidated, to_scale_dict, scaler_dict)
 
-# Scale census tract-level variables by the number of households
-for var in to_scale_census_tract:
-    scale(consolidated, var, 'tot_hhld_census_tract')
+# for var in to_scale_dict["student_count"]:
+#     scale_var(consolidated, var, scaler_dict["student_count"])
 
-# STANDARDIZE
+# # Scale census tract-level variables by the number of households
+# for var in to_scale_census_tract:
+#     scale_var(consolidated, var, 'tot_hhld_census_tract')
+
+# # Scale teacher salaries by the number of teachers
+# scale_var(consolidated, 'salaries_crdc', 'teachers_certified_fte_crdc')
+
+
+# EXPORT RAW DATA (SCALED)
+indicators_by_school_scaled = consolidated[id_vars + outcome_var + indicator_lst]
+indicators_by_school_scaled.to_csv(out_dir + 'indicators_by_school_scaled.csv', index = False)
+
+# IMPUTE MISSING VALUES
 for var in ind_lst:
     impute_w_mean(consolidated, var)
-consolidated[ind_lst] = StandardScaler().fit_transform(consolidated[ind_lst])
 
-
-# ENSURE APPROPRIATE DIRECTIONALITY
-for var in inverse_rel_lst:
-    consolidated[var] = (-1) * consolidated[var]
+# STANDARDIZE
+consolidated[ind_lst + outcome_lst] = StandardScaler().fit_transform(consolidated[ind_lst + outcome_lst])
 
 # CALCULATE INDEX
 consolidated['opportunity_index'] = consolidated[ind_lst].mean(axis=1)
-consolidated.to_csv(out_dir + 'working_df.csv', index = False)
+
+# EXPORT INDEX
+opportunity_index = consolidated[id_lst_abbrev + outcome_lst + ['opportunity_index']]
+opportunity_index.to_csv(out_dir + 'opportunity_index_by_school_scaled.csv', index = False)
+#consolidated.to_csv(out_dir + 'consolidated.csv', index = False)
 
 
 
