@@ -54,17 +54,16 @@ def make_fig():
     #plot bubbles with cps college data
     for _, row in full.iterrows():
         fig.add_trace(go.Scattergeo(
-        #print(row.pctenroll17/100),
         lon = [row['properties.long']],
         lat = [row['properties.lat']],
         marker = dict(
-            #size = row.pctenroll17/100,
-            size=row['pctenroll17']/100,
-            line_color='rgb(40,40,40)',
-            line_width=0.5,
-            sizemode = 'area'
-            )
-        ))
+            #size=row['pctenroll17']/100,
+            # line_color='rgb(40,40,40)',
+            # line_width=0.5,
+            # sizemode = 'area'
+            color=row['pctenroll17']/100,
+            colorscale=["blue", "red"] 
+        )))
 
     # draw census tract boundaries
     fig.add_trace(go.Choropleth(
