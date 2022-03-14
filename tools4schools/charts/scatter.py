@@ -61,7 +61,7 @@ def make_fig():
             # line_color='rgb(40,40,40)',
             # line_width=0.5,
             # sizemode = 'area'
-            color=row['pctenroll17']/100,
+            color=[row['pctenroll17']/100],
             colorscale=["blue", "red"] 
         )))
 
