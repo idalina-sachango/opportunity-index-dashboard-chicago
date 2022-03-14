@@ -8,6 +8,7 @@ from concurrent.futures import process
 import numpy as np
 import pandas as pd
 import requests
+import re
 from sklearn.preprocessing import StandardScaler
 
 #Set directories
@@ -111,10 +112,14 @@ cps_cw = pd.DataFrame.from_dict(cps_cw_json, orient='columns')
 cps_cw.rename(columns = {'nces_id':'ncessch_num'}, inplace = True)
 cps_cw['ncessch'] = cps_cw['ncessch_num'].fillna('').astype(str)
 vars_to_keep = ['schoolid', 'schoolname', 'fullname', 'schoolname2',
-                    'isbe_name', 'street_number', 'street_direction', 'street_name',
+                    'isbe_name', 'street_number', 'street_direction',
+                    'street_name',
                     'city', 'state', 'zip', 'cps_unit', 'oracleid',
-                    'school_category', 'community_area_number', 'community_area', 'geographicarea',
-                    'geographic_area_number', 'cook_county_district', 'census_block',
+                    'school_category', 'community_area_number',
+                    'community_area',
+                    'geographicarea',
+                    'geographic_area_number', 'cook_county_district',
+                    'census_block',
                     'latitude', 'longitude', 'ncessch_num', 'ncessch']
 cps_cw = cps_cw[vars_to_keep]
 cps_cw['census_tract'] = cps_cw['census_block'].str[:-4]
@@ -133,29 +138,48 @@ ccd_cw = pd.read_csv(data_dir + "Urban API (from R)/ccd_directory_2017.csv")
 ccd_cw['ncessch'] = ccd_cw['ncessch'].astype(str)
 
 # MERGE: CCD Directory and CPS 
-#is_unique_id(cps_cw,'ncessch_cps')
 print(len(cps_cw['ncessch_cps'].unique()))
 print(cps_cw.shape)
-#cw = pd.merge(ccd_cw, cps_cw, how = "outer", left_on = 'ncessch', right_on = 'ncessch_cps', indicator = True)
-cw = pd.merge(ccd_cw, cps_cw, how = "inner", left_on = 'ncessch', right_on = 'ncessch_cps', indicator = True)
+cw = pd.merge(ccd_cw,
+              cps_cw,
+              how = "inner",
+              left_on = 'ncessch',
+              right_on = 'ncessch_cps', indicator = True)
 cw.rename(columns = {'_merge':'cps_ccd_cw_merge'}, inplace = True)
-#cw_chi = cw[cw['city_cps'] == 'Chicago']
-#cw_chi_hs = cw[(cw['school_level'] == 'High' or cw['school_category_cps'] == 'HS')]
+clean_rules = {"Hs" : "High School",
+               "HS" : "High School",
+               "Acad" : "Academy",
+               "Schl" : "School",
+               "Elem" : "Elementary",
+               "Alt" : "Alternative",
+               "Agricult" : "Agricultural",
+               "Sci" : "Science",
+               "Int" : "International"}
+clean_rules = {rf'\b{raw}\b': clean for raw, clean in clean_rules.items()}
+cw['school_name'].replace(clean_rules, regex=True, inplace = True)
+
 
 # IMPORT: CPS college enrollment data
-cps_col_enrl = pd.read_excel(data_dir + "CPS/metrics_collenrollpersist_schoollevel_2021.xlsx", sheet_name = "Enrollment & Persistence", header = 1)
-cps_col_enrl = cps_col_enrl[['School ID', 'School Name', 'Graduates.3', 'Enrollments.3', 'Enrollment Pct.3']]
-cps_col_enrl.columns = cps_col_enrl.columns.str.rstrip(".3")
-cps_col_enrl.rename(columns = {'Graduates':'hs_graduates', 'Enrollments':'college_enrollment', 'Enrollment Pct':'college_enrollment_pct'}, inplace = True)
+cps_col_enrl = pd.read_excel((data_dir
+                    + "CPS/metrics_collenrollpersist_schoollevel_2021.xlsx"),
+                    sheet_name = "Enrollment & Persistence", header = 1)
+cps_col_enrl = cps_col_enrl[['School ID', 'School Name', 'Enrollment Pct.3']]
+cps_col_enrl['college_enroll_pct'] = (
+        cps_col_enrl.loc[~cps_col_enrl['Enrollment Pct.3'].isin([".", "*"]),
+        'Enrollment Pct.3']).astype(float) / 100
+cps_col_enrl['college_enroll_pct'].fillna(999, inplace=True)
 cps_col_enrl['School ID'] = cps_col_enrl['School ID'].astype(str)
 
 # MERGE: CPS college enrollment data and crosswalks (CCD and CPS)
-#is_unique_id(cw,['schoolid_cps'])
 print(len(cw['schoolid_cps'].unique()))
 print(cw.shape)
-#consolidated = pd.merge(cps_col_enrl, cw, how = "left", left_on = "School ID", right_on = "schoolid_cps", indicator = True)
-consolidated = pd.merge(cps_col_enrl, cw, how = "inner", left_on = "School ID", right_on = "schoolid_cps", indicator = True)
-consolidated.rename(columns = {'_merge':'cw_not_in_cps_col_enrl'}, inplace = True)
+consolidated = pd.merge(cps_col_enrl,
+                        cw,
+                        how = "inner",
+                        left_on = "School ID",
+                        right_on = "schoolid_cps", indicator = True)
+consolidated.rename(columns = {'_merge':'cw_not_in_cps_col_enrl'},
+                    inplace = True)
 
 #########################################################################
 #(sanity check) - SHARE WITH TEAM
@@ -168,69 +192,82 @@ crdc['ncessch'] = crdc['ncessch'].astype(str)
 
 print(len(crdc['ncessch'].unique()))
 print(crdc.shape)
-consolidated = pd.merge(consolidated, crdc, how = "inner", on = "ncessch", indicator = True)
+consolidated = pd.merge(consolidated,
+                        crdc,
+                        how = "inner",
+                        on = ['leaid', 'ncessch', 'year', 'fips'],
+                        indicator = True)
 consolidated.rename(columns = {'_merge':'crdc_not_matched'}, inplace = True)
-consolidated.to_csv(out_dir + 'crdc_ccd_cps.csv', index = False)
 
 # MERGE: American Community Survey Data
 acs = pd.read_csv(data_dir + 'ACS/acs_data_1.csv')
 process_fips(acs)
-#add_leading_zeroes(acs, 'tract', 6)
-#add_leading_zeroes(acs, 'county', 3)
-
-# create census tract fips code
-#census_vars = ['state', 'county', 'tract']
-#acs['census_tract'] = acs[census_vars].apply(lambda row: ''.join(row.values.astype(str)), axis=1)
 
 print(len(acs['census_tract'].unique()))
 print(acs.shape)
-acs_vars_to_keep = ['tot_hhld', 'internet_rate', 'emp_rate_25_64', 'above_pov_rate', 'census_tract']
-consolidated = pd.merge(consolidated, acs[acs_vars_to_keep], how = "inner", left_on = "census_tract_cps", right_on = "census_tract", indicator = True)
-consolidated.rename(columns = {'_merge':'acs_not_matched'}, inplace = True)
-consolidated.rename(columns = {'tot_hhld':'tot_hhld_census_tract'}, inplace = True)
+acs_vars_to_keep = ['tot_hhld',
+                    'internet_rate',
+                    'emp_rate_25_64',
+                    'above_pov_rate',
+                    'census_tract']
+consolidated = pd.merge(consolidated,
+                        acs[acs_vars_to_keep],
+                        how = "inner",
+                        left_on = "census_tract_cps",
+                        right_on = "census_tract", indicator = True)
+consolidated.drop(['census_tract'], axis = 1, inplace = True)
+consolidated.rename(columns = {'_merge':'acs_not_matched',
+                               'tot_hhld':'tot_hhld_census_tract'}, inplace = True)
 
 # MERGE: School budgets
 cps_budgets = pd.read_csv(data_dir + 'CPS/cps_budgets_2017.csv')
 consolidated['oracleid_cps'] = consolidated['oracleid_cps'].str.rstrip(".0")
-consolidated = pd.merge(consolidated, cps_budgets, how = "inner", left_on = "oracleid_cps", right_on = "oracle_id", indicator = True)
+consolidated = pd.merge(consolidated,
+                        cps_budgets[['oracle_id', 'FY 2017 Ending Budget']],
+                        how = "inner",
+                        left_on = "oracleid_cps",
+                        right_on = "oracle_id", indicator = True)
 consolidated.rename(columns = {'_merge':'cps_budget_not_in_cps_col_enrl'}, inplace = True)
 
 # MERGE: Food stamps
 inc_fs = pd.read_csv(data_dir + 'Economic/income_food_stamps.csv')
 process_fips(inc_fs)
-#add_leading_zeroes(inc_fs, 'tract', 6)
-#add_leading_zeroes(inc_fs, 'county', 3)
-
-#inc_fs['tract'] = inc_fs['tract'].apply(lambda x: '{0:0>6}'.format(x)) #REPEATED CODE !!!
-#inc_fs['county'] = inc_fs['county'].apply(lambda x: '{0:0>3}'.format(x))
-#census_vars = ['state', 'county', 'tract'] 
-#inc_fs['census_tract'] = inc_fs[census_vars].apply(lambda row: ''.join(row.values.astype(str)), axis=1)
-
 print(len(inc_fs['census_tract'].unique()))
 print(inc_fs.shape)
-consolidated = pd.merge(consolidated, inc_fs[['food_stamps', 'median_earnings', 'census_tract']], how = 'inner', left_on = 'census_tract_cps', right_on = 'census_tract', indicator = True)
+consolidated = pd.merge(consolidated,
+                        inc_fs[['food_stamps',
+                                'median_earnings',
+                                'census_tract']],
+                        how = 'inner',
+                        left_on = 'census_tract_cps',
+                        right_on = 'census_tract', indicator = True)
 consolidated.rename(columns = {'_merge':'inc_fs_not_matched'}, inplace = True)
+
 
 # MERGE: Air Quality
 aqi = pd.read_csv(data_dir + 'Environmental/chi_air.csv')
 aqi['ctfips'] = aqi['ctfips'].astype(str)
-aqi = aqi[aqi['date'] == '01JAN2016']
+aqi = aqi.groupby(['ctfips'])['ds_pm_pred'].sum().reset_index()
+
 
 print(len(aqi['ctfips'].unique()))
 print(aqi.shape)
-consolidated = pd.merge(consolidated, aqi, how = 'inner', left_on = 'census_tract_cps', right_on = 'ctfips', indicator = True)
+consolidated = pd.merge(consolidated,
+                        aqi,
+                        how = 'inner',
+                        left_on = 'census_tract_cps',
+                        right_on = 'ctfips', indicator = True)
 consolidated.rename(columns = {'_merge':'aqi_not_matched'}, inplace = True)
-#consolidated.columns =consolidated.columns.str.rstrip("_x")
 
 # MERGE: Crime
 
 # VARIABLE LISTS & DICTIONARIES
 
 id_vars = ['School ID', 'School Name', 'ncessch', 'school_id',
-    'school_name_x', 'leaid_x', 'latitude_x', 'longitude_x',
-    'census_tract_x']
+    'school_name', 'leaid', 'latitude', 'longitude',
+    'census_tract']
 
-outcome_var = ['college_enrollment_pct']
+outcome_var = ['college_enroll_pct']
 to_scale_dict = {"teacher_count" : ['salaries_crdc'],
                  "student_count" : ['free_or_reduced_price_lunch',
                                     'teachers_certified_fte_crdc',
@@ -254,14 +291,12 @@ scaler_dict = {"teacher_count": 'teachers_certified_fte_crdc',
 
 # EXPORT RAW DATA (UNSCALED)
 indicators_by_school_unscaled = consolidated[id_vars + outcome_var + indicator_lst]
-indicators_by_school_unscaled.to_csv(out_dir + 'indicators_by_school_unscaled2.csv', index = False)
+indicators_by_school_unscaled.to_csv((out_dir +
+                                      'indicators_by_school_unscaled.csv'),
+                                      index = False)
 
 # SCALE
 scale_df(consolidated, to_scale_dict, scaler_dict)
-
-# EXPORT RAW DATA (SCALED)
-indicators_by_school_scaled = consolidated[id_vars + outcome_var + indicator_lst]
-indicators_by_school_scaled.to_csv(out_dir + 'indicators_by_school_scaled2.csv', index = False)
 
 # IMPUTE MISSING VALUES
 for var in indicator_lst:
@@ -271,12 +306,18 @@ for var in indicator_lst:
 to_std = indicator_lst + outcome_var
 consolidated[to_std] = StandardScaler().fit_transform(consolidated[to_std])
 
+# EXPORT RAW DATA (SCALED)
+indicators_by_school_scaled = consolidated[id_vars + outcome_var + indicator_lst]
+indicators_by_school_scaled.to_csv((out_dir +
+                                    'indicators_by_school_scaled.csv'),
+                                    index = False)
+
 # CALCULATE INDEX
-consolidated['opportunity_index'] = consolidated[indicator_lst].mean(axis=1)
+#consolidated['opportunity_index'] = consolidated[indicator_lst].mean(axis=1)
 
 # EXPORT INDEX
-opportunity_index = consolidated[id_vars + outcome_var + ['opportunity_index']]
-opportunity_index.to_csv(out_dir + 'opportunity_index_by_school_scaled.csv', index = False)
+#opportunity_index = consolidated[id_vars + outcome_var + ['opportunity_index']]
+#opportunity_index.to_csv(out_dir + 'opportunity_index_by_school_scaled.csv', index = False)
 
 
 
