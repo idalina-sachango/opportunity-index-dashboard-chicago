@@ -25,20 +25,12 @@ def make_fig():
     census_df["blank_bounds"] = 0
     census_df = census_df[["geoid10", "blank_bounds"]]
 
-
-
     #cps_locations = open_path("cps-geojson.geojson", "school_id")
     census_tract = open_path("census_tract.geojson", "geoid10")
 
     df2 = pd.read_csv(data_path.joinpath("opportunity_index_by_school_scaled.csv"), dtype={"School ID": str})
     df2 = pd.DataFrame(df2)
     df2 = df2.assign(opportunity_ranked = pd.qcut(df2.opportunity_index, 5, labels = [1, 2, 3, 4, 5]))
-
-
-    df3 = pd.read_csv(data_path.joinpath("chi_air.csv"), dtype={"ctfips": str})
-    df3 = df3.fillna(999)
-    df3 = pd.DataFrame(df3)
-    df3["blank_bounds"] = 0
 
     fig = go.Figure()
 
