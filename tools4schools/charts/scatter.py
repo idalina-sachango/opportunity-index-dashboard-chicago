@@ -35,18 +35,22 @@ def make_fig():
     df2 = df2.assign(opportunity_ranked = pd.qcut(df2.opportunity_index, 5, labels = [1, 2, 3, 4, 5]))
 
     fig = go.Figure()
+    opp = df2["opportunity_index"]
+    
 
     #plot bubbles with cps college data
     fig.add_trace(go.Scattergeo(
         lon = df2['longitude'],
         lat = df2['latitude'],
-        showlegend=True,
-        hovertext=df2['school_name'],
-        # hoverinfo=df2['opportunity_index'].astype(str),
+        text = df2["school_name"],
         marker_color=df2['opportunity_ranked'],
         marker_cmin=1,
         marker_cmax=5,
         marker_colorscale='rdylgn'))
+
+    fig.update_traces(customdata=df2["opportunity_index"])
+    fig.update_traces(hovertemplate='<b>School Name<extra></extra></b>: %{text}<br>' + 
+                                    '<b>Opportunity Index:</b> %{customdata}')
 
     # draw census tract boundariess
     fig.add_trace(go.Choropleth(
@@ -55,19 +59,19 @@ def make_fig():
         locations=census_df["geoid10"],
         z = census_df["blank_bounds"],
         showscale=False,
-        hovertext=df2['school_name'],
         hoverinfo='skip'
     ))
 
     fig.update_geos(fitbounds="locations", visible=True)
     
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
-    hovermode='x')
+    hovermode='x unified')
 
     fig.update_layout(
         title_text = 'College Enrollment by School',
         geo_scope='usa', # limite map scope to USA,
     )
+
     fig.update_coloraxes(showscale=False)
 
     return fig
