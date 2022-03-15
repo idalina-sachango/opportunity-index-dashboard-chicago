@@ -35,19 +35,25 @@ def make_fig():
     df3 = pd.DataFrame(df3)
     df3["blank_bounds"] = 0
 
+
+
+
+
     #colors = ["royalblue","crimson","lightseagreen","orange","lightgrey"]
     fig = go.Figure()
 
     #plot bubbles with cps college data
-    for _, row in df2.iterrows():
-        fig.add_trace(go.Scattergeo(
-        lon = [row['longitude']],
-        lat = [row['latitude']],
-        showlegend=False,
-        marker_color=[row['opportunity_ranked']],
+
+    fig.add_trace(go.Scattergeo(
+        lon = df2['longitude'],
+        lat = df2['latitude'],
+        showlegend=True,
+        hovertext=df2['school_name'],
+        # hoverinfo=df2['opportunity_index'].astype(str),
+        marker_color=df2['opportunity_ranked'],
         marker_cmin=1,
         marker_cmax=5,
-        marker_colorscale='ylorrd'))
+        marker_colorscale='rdylgn'))
 
     # draw census tract boundariess
     fig.add_trace(go.Choropleth(
@@ -55,18 +61,52 @@ def make_fig():
         featureidkey="properties.geoid10",
         locations=df3["ctfips"],
         z = df3["blank_bounds"],
-        showscale=False
+        showscale=False,
+        hovertext=df2['school_name'],
+        hoverinfo='skip'
     ))
-
-    fig.update_geos(fitbounds="locations", visible=False)
     
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+
+    fig.update_geos(fitbounds="locations", visible=True)
+    
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+    hovermode='x')
 
     fig.update_layout(
         title_text = 'College Enrollment by School',
         geo_scope='usa', # limite map scope to USA,
-        showlegend=False
     )
     fig.update_coloraxes(showscale=False)
+
+
+    ##################
+
+    updatemenu = []
+    buttons = []
+    for _, item in df2[["school_name", "opportunity_index"]].iterrows():
+        print(item)
+        name, opp = item
+        print(name)
+        buttons.append(dict(method='restyle',
+                            label=name,
+                            visible=True,
+                            args=[{'y':[name],
+                                   'x':[opp],
+                                   'type':'scatter'}, [0]]
+                            )
+                      )
+
+    # some adjustments to the updatemenus
+    updatemenu = []
+    your_menu = dict()
+    updatemenu.append(your_menu)
+
+    updatemenu[0]['buttons'] = buttons
+    updatemenu[0]['direction'] = 'down'
+    updatemenu[0]['showactive'] = True
+
+    # add dropdown menus to the figure
+    fig.update_layout(showlegend=False, updatemenus=updatemenu)
 
     return fig
