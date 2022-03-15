@@ -1,11 +1,11 @@
 body {
   font-family: "Lato", sans-serif;
   margin: 0;
-  background-color: #F7F7F7;
+  background-color: #000000;
 }
 
 .header {
-  background-color: #222222;
+  background-color: #ffffff;
   height: 100px;
   padding: 8px 0 0 0;
 }
@@ -17,7 +17,7 @@ body {
 }
 
 .header-title {
-  color: #FFFFFF;
+  color: #000000;
   font-size: 48px;
   font-weight: bold;
   text-align: center;
@@ -25,7 +25,7 @@ body {
 }
 
 .header-description {
-  color: #CFCFCF;
+  color: #000000;
   margin: 4px auto;
   text-align: center;
   max-width: 384px;
