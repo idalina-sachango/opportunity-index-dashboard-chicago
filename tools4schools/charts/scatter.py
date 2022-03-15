@@ -2,8 +2,10 @@
 import plotly.graph_objects as go
 import pandas as pd
 import json
+import geopandas as gpd
 from pandas.io.json import json_normalize
 from pathlib import Path
+
 
 
 def make_fig():
@@ -18,6 +20,12 @@ def make_fig():
         for i in range(len(df["features"])):
             df["features"][i]["id"] = df["features"][i]["properties"][feature]
         return df
+
+    census_df = gpd.read_file(data_path_geo.joinpath("census_tract.geojson"))
+    census_df["blank_bounds"] = 0
+    census_df = census_df[["geoid10", "blank_bounds"]]
+
+
 
     #cps_locations = open_path("cps-geojson.geojson", "school_id")
     census_tract = open_path("census_tract.geojson", "geoid10")
@@ -50,8 +58,8 @@ def make_fig():
     fig.add_trace(go.Choropleth(
         geojson=census_tract,
         featureidkey="properties.geoid10",
-        locations=df3["ctfips"],
-        z = df3["blank_bounds"],
+        locations=census_df["geoid10"],
+        z = census_df["blank_bounds"],
         showscale=False,
         hovertext=df2['school_name'],
         hoverinfo='skip'
