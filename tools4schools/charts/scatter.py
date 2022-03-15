@@ -7,7 +7,6 @@ from pandas.io.json import json_normalize
 from pathlib import Path
 
 
-
 def make_fig():
     home_path = Path(__file__).parent.parent
     data_path = home_path.joinpath("data")
