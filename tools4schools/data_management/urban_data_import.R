@@ -7,9 +7,8 @@ library(educationdata)
 library(tidyverse)
 
 
-root <- "C:/Users/nived/OneDrive - The University of Chicago/Academic/Winter 2021/CS 122/Project"
-output <- paste0(root,"/Output")
-data_dir<- paste0(root,"/Data")
+#root <- "C:/Users/nived/OneDrive - The University of Chicago/Academic/Winter 2021/CS 122/Project"
+export_dir<- paste0("../data/ccd_crdc/")
 
 `%notin%` <- Negate(`%in%`)
 
@@ -24,7 +23,7 @@ ccd_directory <- get_education_data(level = 'schools',
                                                    fips = 17),
                                     add_labels = TRUE)
 
-write_csv(ccd_directory, paste0(data_dir, "/ccd_directory_2017.csv"))
+write_csv(ccd_directory, paste0(export_dir, "ccd_directory_2017.csv"))
 
 #(1b) ccd: school enrollment by race and sex
 ccd_enrollment <- get_education_data(level = 'schools', 
@@ -229,7 +228,7 @@ crdc_ap_ib <- crdc_ap_ib %>%
 colnames(crdc_ap_ib)<-gsub("_total_total", "", colnames(crdc_ap_ib), ignore.case = TRUE)
 consolidated <- left_join(consolidated, crdc_ap_ib, by = crdc_vars)
 names(consolidated)[6:length(names(consolidated))] <- paste0(names(consolidated)[6:length(names(consolidated))],"_crdc")
-write_csv(consolidated, paste0(output, "/crdc_data_2017.csv"))
+write_csv(consolidated, paste0(export_dir, "/crdc_data_2017.csv"))
 
 
 # # Per-student statistics
