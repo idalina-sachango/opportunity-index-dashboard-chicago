@@ -130,7 +130,6 @@ app.layout = html.Div(
             children = [
                 html.Div(
                     children = [
-                        html.H3('Chicago Maps'),
                         dcc.Graph(
                             id = 'Maps',
                             figure = run_all_fig),],
@@ -151,8 +150,6 @@ app.layout = html.Div(
                             options=[{'label': i, 'value': i} \
                                 for i in table_df['school_name'].unique()],
                             multi=True,
-                            # style={'backgroundColor': 'rgb(50, 50, 50)',
-                            #         'color': 'white'},
                             placeholder='Filter by School name...',),
                                             ),
         html.Div(id='table-container')

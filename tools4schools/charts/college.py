@@ -23,7 +23,6 @@ def make_fig():
     census_df["blank_bounds"] = 0
     census_df = census_df[["geoid10", "blank_bounds"]]
 
-    #cps_locations = open_path("cps-geojson.geojson", "school_id")
     census_tract = open_path("census_tract.geojson", "geoid10")
 
     df2 = pd.read_csv(data_path.joinpath("indicators_by_school_unscaled.csv"), dtype={"School ID": str})
@@ -31,9 +30,8 @@ def make_fig():
     df2 = df2.assign(college_ranked = pd.qcut(df2.college_enroll_pct, 5, labels = [1, 2, 3, 4, 5]))
 
     fig = go.Figure()
-    
 
-    #plot bubbles with cps college data
+
     fig.add_trace(go.Scattergeo(
         lon = df2['longitude'],
         lat = df2['latitude'],
@@ -42,15 +40,16 @@ def make_fig():
         marker_cmin=min(df2["college_enroll_pct"]),
         marker_cmax=max(df2["college_enroll_pct"]),
         marker_colorbar=dict(thickness=20),
+        marker_colorbar_title='College Enrollment Percentage',
         marker_colorscale='blues',
         marker_size=10,
-        showlegend=True,
+        showlegend=False,
         visible=False))
         
 
     fig.update_traces(customdata=df2["college_enroll_pct"])
     fig.update_traces(hovertemplate='<b>School Name<extra></extra></b>: %{text}<br>' + 
-                                    '<b>Opportunity Index:</b> %{customdata}')
+                                    '<b>College Enrollment Percentage:</b> %{customdata}')
 
     # draw census tract boundariess
     fig.add_trace(go.Choropleth(
@@ -60,14 +59,10 @@ def make_fig():
         z = census_df["blank_bounds"],
         showscale=False,
         hoverinfo='skip',
-        visible=False,
-        colorbar_title='College Enrollment Percentage'
+        visible=False
     ))
 
     fig.update_geos(fitbounds="locations", visible=False)
-    
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
-    hovermode='x unified')
 
     fig.update_layout(
         title_text = 'College Enrollment by School',
@@ -75,7 +70,9 @@ def make_fig():
     )
 
     fig.update_coloraxes(showscale=False)
-    fig.update_layout(legend_title = "College Enrollment Percentage")
+
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+    hovermode='x unified')
 
     return fig
 

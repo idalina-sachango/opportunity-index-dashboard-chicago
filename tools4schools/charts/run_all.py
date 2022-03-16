@@ -23,10 +23,6 @@ def run_all():
     fig.add_traces(poverty_fig.data)
     fig.add_traces(budget_fig.data)
 
-
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
-    hovermode='x unified')
-
     fig.update_layout(
         updatemenus=[
             dict(
@@ -37,38 +33,35 @@ def run_all():
                                             True,True,True,
                                             False,False,False,
                                             False,False,False,
-                                            False,False]},
-                               {"title": "Opportunity index mapping"}]),
+                                            False,False]}]),
                     dict(label="College Enrollment Percentage by School",
                          method="update",
                          args=[{"visible": [False,False,False,
                                             False,False,False,
                                             True,True,False,
                                             False,False,False,
-                                            False,False]},
-                               {"title": "College enrollment index mapping"}]),
-                    dict(label="Poverty Rate x College Enrollment",
+                                            False,False]}]),
+                    dict(label="Poverty Rate by Census Tract and College Enrollment by School",
                          method="update",
                          args=[{"visible": [False,False,False,
                                             False,False,False,
                                             False,False,True,
                                             True,False,False,
-                                            False,False]},
-                               {"title": "College enrollment index mapping to poverty rate"}]),
-                    dict(label="Budget by school",
+                                            False,False]}]),
+                    dict(label="Budget by School",
                          method="update",
                          args=[{"visible": [False,False,False,
                                             False,False,False,
                                             False,False,False,
                                             False,True,True,
-                                            True,True]},
-                               {"title": "Budget by school"}])
+                                            True,True]}])
                 ]),
                 type = "buttons",
                 direction="left",
                 pad={"r": 10, "t": 10},
                 showactive=True,
-                x=0.2,
+                x=0.175,
+                y=1.175,
                 xanchor="left",
                 yanchor="top"
 
@@ -77,4 +70,7 @@ def run_all():
         ]
 
     )
+
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+    hovermode='x unified')
     return fig
