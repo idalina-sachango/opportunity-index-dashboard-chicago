@@ -1,6 +1,5 @@
 #### Akila's ACS data code 
 
-
 import requests
 import pandas as pd
 
@@ -29,4 +28,4 @@ df = df.assign(internet_rate = 100 * (df.tot_hhld_int / df.tot_hhld),
                 emp_rate_25_64 = 100 - df.unemp_rate_25_64,
                 above_pov_rate = 100 - df.pov_rate)
 
-df.to_csv('data/acs_data_1.csv')
+df.to_csv('../data/acs/acs_data_1.csv')
