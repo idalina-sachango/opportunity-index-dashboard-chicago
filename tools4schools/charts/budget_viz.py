@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import json
 
-
+#def make_fig():
 home_path = Path(__file__).parent.parent 
 data_path = home_path.joinpath("Project/Output")
 data_path_geo = home_path.joinpath("data")
@@ -33,7 +33,6 @@ df = pd.DataFrame(df)
 df["blank_bounds"] = 0
 df.rename(columns={"FY 2017 Ending Budget": "budget_per_student", "census_tract_x": "ctfips", \
 "latitude_x": "lat", "longitude_x": "lon", "School Name": "school_name"}, inplace=True)
-#print(df[df["School Name"] == "VAUGHN HS"])
 
 
 #create intervals for bubble size
@@ -55,7 +54,8 @@ df.rename(columns={"FY 2017 Ending Budget": "budget_per_student", "census_tract_
 #create base census tract map
 fig.add_trace(go.Choropleth(geojson=census_tract,featureidkey="properties.geoid10",
     locations=census_df["geoid10"],
-    z = census_df["blank_bounds"]
+    z = census_df["blank_bounds"],
+    showscale=False,
 ))
 
 fig.update_geos(fitbounds="locations", visible=True)
@@ -71,17 +71,17 @@ fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
 # text = "School Name"))
 
 for _, row in df.iterrows():
-    budge = pd.Series(row.budget_per_student)
     fig.add_trace(go.Scattergeo(
     lat = [row.lat],
     lon = [row.lon],
+    showlegend = False,
     marker = dict(size = (row.budget_per_student) * 0.002,
     color = 'rgb(93, 164, 214)', 
     line_color='rgb(40,40,40)', 
     line_width=0.5,
     sizemode = 'area'),
     text=pd.Series(row.school_name),
-    customdata=pd.Series(row.budget_per_student),
+    customdata=pd.Series(round(row.budget_per_student, 2)),
     hovertemplate='<b>School Name<extra></extra></b>: %{text}<br>' + 
                                     '<b>Budget per Student:</b> %{customdata}',
     hoverinfo = "text"
@@ -113,10 +113,14 @@ for _, row in df.iterrows():
 #     #     scope = 'usa',
 #     #     landcolor = 'rgb(217, 217, 217)',
 #     )
-#fig.update_geos(fitbounds="locations", visible=True)
-fig.update_layout(title_text='Budget Per Student', title_x=0.5)
-#fig.update_layout(title_text = "Budget Per Student", show_legend=False, geo_scope='usa')
+# fig.update_geos(fitbounds="locations", visible=True)
+# fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+# hovermode='x', title_text = 'Budget per Student',
+# geo_scope='usa') 
+fig.update_coloraxes(showscale=False)
+#fig.update_traces(show_legend = False)
 fig.show()
+    #return fig
 
 
 

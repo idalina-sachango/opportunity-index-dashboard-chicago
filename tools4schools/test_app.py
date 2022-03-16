@@ -3,7 +3,8 @@ import dash
 from dash import dcc
 from dash import  html
 from dash.dependencies import Input, Output
-from tools4schools.charts import scatter
+from tools4schools.charts import scatter, budget_viz
+
 
 
 external_stylesheets = [
@@ -19,6 +20,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 ### Figure 1
 scatter_fig = scatter.make_fig()
+budget_fig = budget_viz.make_fig()
 
 
 ### App Title
@@ -44,6 +46,17 @@ app.layout = html.Div(
                         dcc.Graph(
                             id = 'Map Choropleth',
                             figure = scatter_fig),],
+                    className="card",
+                ),
+                ],
+        className="wrapper",),
+        html.Div(
+            children = [
+                html.Div(
+                    children = ['Budget Per Student',
+                        dcc.Graph(
+                            id = 'Map Choropleth',
+                            figure = budget_fig)],
                     className="card",
                 ),
                 ],
