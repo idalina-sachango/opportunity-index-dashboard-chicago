@@ -1,14 +1,20 @@
-
-import plotly.graph_objects as go
-import pandas as pd
 import json
+from pathlib import Path
 import geopandas as gpd
 import numpy as np
-from pandas.io.json import json_normalize
-from pathlib import Path
+import plotly.graph_objects as go
+import pandas as pd
 
 
 def make_fig():
+    """
+    Create the plotly figure that corresponds to
+    the indicator of interest. Sets the path to files, 
+    opens geojson's, and does any figure specific 
+    transformations.
+    Inputs: None
+    Outputs: Plotly figure
+    """
     home_path = Path(__file__).parent.parent
     data_path = home_path.joinpath("data/results")
     data_path_geo = home_path.joinpath("data/geojson")
@@ -29,38 +35,39 @@ def make_fig():
 
     census_tract = open_path("census_tract.geojson", "geoid10")
 
-    df2 = pd.read_csv(data_path.joinpath("opportunity_index_by_school_scaled.csv"), dtype={"School ID": str})
-    df2 = pd.DataFrame(df2)
+    df = pd.read_csv(data_path.joinpath("opportunity_index_by_school_scaled.csv"),
+                      dtype={"School ID": str})
+    df = pd.DataFrame(df)
 
 
-    df2['opportunity_ranked'] = np.select(
+    df['opportunity_ranked'] = np.select(
         [
-            df2['opportunity_index'].between(0, 20, inclusive=True), 
-            df2['opportunity_index'].between(20, 40, inclusive='right'),
-            df2['opportunity_index'].between(40, 60, inclusive='right'),
-            df2['opportunity_index'].between(60, 80, inclusive='right'),
-            df2['opportunity_index'].between(80, 100, inclusive='right')
-        ], 
+            df['opportunity_index'].between(0, 20, inclusive=True),
+            df['opportunity_index'].between(20, 40, inclusive='right'),
+            df['opportunity_index'].between(40, 60, inclusive='right'),
+            df['opportunity_index'].between(60, 80, inclusive='right'),
+            df['opportunity_index'].between(80, 100, inclusive='right')
+        ],
         [
-            1, 
+            1,
             2,
             3,
             4,
             5
-        ], 
+        ],
         default='Unknown'
     )
 
 
-    pd.to_numeric(df2['opportunity_ranked'])
+    pd.to_numeric(df['opportunity_ranked'])
     fig = go.Figure()
 
-    for _, row in enumerate(df2['opportunity_ranked'].unique()):
+    for _, row in enumerate(df['opportunity_ranked'].unique()):
         fig.add_trace(go.Scattergeo(
-        lon = df2['longitude'][df2['opportunity_ranked'] == row],
-        lat = df2['latitude'][df2['opportunity_ranked'] == row],
-        text = df2['school_name'][df2['opportunity_ranked'] == row],
-        marker_color=df2['opportunity_ranked'][df2['opportunity_ranked'] == row].astype(int),
+        lon = df['longitude'][df['opportunity_ranked'] == row],
+        lat = df['latitude'][df['opportunity_ranked'] == row],
+        text = df['school_name'][df['opportunity_ranked'] == row],
+        marker_color=df['opportunity_ranked'][df['opportunity_ranked'] == row].astype(int),
         marker_cmin=1,
         marker_cmax=5,
         marker_colorscale='rdylgn',
@@ -68,8 +75,8 @@ def make_fig():
         legendgrouptitle=dict(text='Opportunity Ranking'),
         showlegend=True,
         name=row,
-        customdata=df2["opportunity_index"][df2['opportunity_ranked'] == row],
-        hovertemplate='<b>School Name<extra></extra></b>: %{text}<br>' + 
+        customdata=df["opportunity_index"][df['opportunity_ranked'] == row],
+        hovertemplate='<b>School Name<extra></extra></b>: %{text}<br>' +
                                         '<b>Opportunity Index:</b> %{customdata}'
         ))
 

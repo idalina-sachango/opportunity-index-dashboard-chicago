@@ -9,6 +9,14 @@ home_path = Path(__file__).parent.parent
 data_path = home_path.joinpath("data/results")
 
 def make_fig():
+    """
+    Create the plotly figure that corresponds to
+    the indicator of interest. Sets the path to files,
+    opens geojson's if necessary, and does any figure specific
+    transformations.
+    Inputs: None
+    Outputs: Plotly figure
+    """
     df1 = pd.read_csv(data_path.joinpath("opportunity_index_by_school_scaled.csv"))
     df2 = pd.read_csv(data_path.joinpath('indicators_by_school_unscaled.csv'))
 

@@ -3,11 +3,18 @@ import pandas as pd
 import json
 import geopandas as gpd
 import numpy as np
-from pandas.io.json import json_normalize
 from pathlib import Path
 
 
 def make_fig():
+    """
+    Create the plotly figure that corresponds to
+    the indicator of interest. Sets the path to files,
+    opens geojson's, and does any figure specific
+    transformations.
+    Inputs: None
+    Outputs: Plotly figure
+    """
     home_path = Path(__file__).parent.parent
     data_path_results = home_path.joinpath("data/results")
     data_path_acs = home_path.joinpath("data/acs")
@@ -27,9 +34,9 @@ def make_fig():
 
     census_tract = open_path("census_tract.geojson", "geoid10")
 
-    df2 = pd.read_csv(data_path_results.joinpath("indicators_by_school_unscaled.csv"), dtype={"School ID": str})
-    df2 = pd.DataFrame(df2)
-    df2['pov_rate'] = round(100 - df2['above_pov_rate'], 2)
+    df = pd.read_csv(data_path_results.joinpath("indicators_by_school_unscaled.csv"), dtype={"School ID": str})
+    df = pd.DataFrame(df)
+    df['pov_rate'] = round(100 - df['above_pov_rate'], 2)
 
     acs = pd.read_csv(data_path_acs.joinpath("acs_data_1.csv"))
     acs = pd.DataFrame(acs)
@@ -47,19 +54,18 @@ def make_fig():
 
 
     fig = go.Figure()
-    
 
     fig.add_trace(go.Scattergeo(
-        lon = df2['longitude'],
-        lat = df2['latitude'],
-        text = df2["school_name"],
+        lon = df['longitude'],
+        lat = df['latitude'],
+        text = df["school_name"],
         marker_color='white',
-        marker_size=df2['college_enroll_pct'] * 0.2,
+        marker_size=df['college_enroll_pct'] * 0.2,
         showlegend=False,
         visible=False))
         
 
-    fig.update_traces(customdata=df2[['college_enroll_pct', 'pov_rate', 'census_tract']])
+    fig.update_traces(customdata=df[['college_enroll_pct', 'pov_rate', 'census_tract']])
     fig.update_traces(hovertemplate='<b>School Name<extra></extra></b>: %{text}<br>' + 
                                     '<b>Poverty Rate:</b> %{customdata[1]}<br>' +
                                     '<b>College Enrollment:</b> %{customdata[0]}<br>' +
@@ -88,7 +94,6 @@ def make_fig():
 
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
     hovermode='x unified')
-
     return fig
 
 

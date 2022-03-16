@@ -8,6 +8,14 @@ import numpy as np
 
 
 def make_fig():
+    """
+    Create the plotly figure that corresponds to
+    the indicator of interest. Sets the path to files,
+    opens geojson's, and does any figure specific
+    transformations.
+    Inputs: None
+    Outputs: Plotly figure
+    """
     home_path = Path(__file__).parent.parent 
     data_path = home_path.joinpath("data/results")
     data_path_geo = home_path.joinpath("data/geojson")

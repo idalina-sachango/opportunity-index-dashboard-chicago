@@ -1,14 +1,16 @@
-from asyncio import run
 import plotly.graph_objects as go
-import pandas as pd
-import json
-import geopandas as gpd
-from pandas.io.json import json_normalize
-from pathlib import Path
 from tools4schools.charts import scatter, college, poverty_rate, budget
 
 
 def run_all():
+    """
+    Takes every chart object and adds them into a single
+    plotly graph by adding their data as individual layers
+    to the map. Creates buttons for each map where the user can toggle
+    to a certain map view.
+    Inputs: None
+    Outputs: Plotly figure
+    """
 
     scatter_fig = scatter.make_fig()
     college_fig = college.make_fig()
@@ -61,7 +63,7 @@ def run_all():
                 pad={"r": 10, "t": 10},
                 showactive=True,
                 x=0.175,
-                y=1.175,
+                y=1.165,
                 xanchor="left",
                 yanchor="top"
 

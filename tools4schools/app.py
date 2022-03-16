@@ -3,7 +3,6 @@ Dash App for Tools4Schools
 
 Output layout including 3 visulations and a table of
 the resulting data using callbacks
-
 '''
 from pathlib import Path
 from dash import dcc, html, dash_table
