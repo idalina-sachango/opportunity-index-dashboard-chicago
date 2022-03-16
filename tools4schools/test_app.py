@@ -2,7 +2,7 @@
 import dash
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output
-from tools4schools.charts import scatter, air_pollution
+from tools4schools.charts import scatter, air_pollution, run_all
 import pandas as pd
 from pathlib import Path
 
@@ -19,6 +19,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 ### Figure 1
 scatter_fig = scatter.make_fig()
+run_all_fig = run_all.run_all()
 #air_pollution_fig = air_pollution.make_fig()
 
 
@@ -104,7 +105,7 @@ app.layout = html.Div(
                     children = ['College enrollment by school',
                         dcc.Graph(
                             id = 'Map scatter',
-                            figure = scatter_fig),],
+                            figure = run_all_fig),],
                     className="card",
                 ),
                 ],
