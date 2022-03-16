@@ -10,7 +10,7 @@ from pathlib import Path
 
 def make_fig():
     home_path = Path(__file__).parent.parent
-    data_path = home_path.joinpath("data")
+    data_path = home_path.joinpath("data/results")
     data_path_geo = home_path.joinpath("data/geojson")
 
 
@@ -21,14 +21,13 @@ def make_fig():
             df["features"][i]["id"] = df["features"][i]["properties"][feature]
         return df
 
+    #make census df from geojson
+    census_tract = open_path("census_tract.geojson", "geoid10")
+
+
     census_df = gpd.read_file(data_path_geo.joinpath("census_tract.geojson"))
     census_df["blank_bounds"] = 0
     census_df = census_df[["geoid10", "blank_bounds"]]
-
-
-
-    #cps_locations = open_path("cps-geojson.geojson", "school_id")
-    census_tract = open_path("census_tract.geojson", "geoid10")
 
     df2 = pd.read_csv(data_path.joinpath("opportunity_index_by_school_scaled.csv"), dtype={"School ID": str})
     df2 = pd.DataFrame(df2)
@@ -36,9 +35,8 @@ def make_fig():
 
     fig = go.Figure()
     opp = df2["opportunity_index"]
-    
 
-    #plot bubbles with cps college data
+    #plot points with opp index data
     fig.add_trace(go.Scattergeo(
         lon = df2['longitude'],
         lat = df2['latitude'],
@@ -69,7 +67,7 @@ def make_fig():
 
     fig.update_layout(
         title_text = 'College Enrollment by School',
-        geo_scope='usa', # limite map scope to USA,
+        geo_scope='usa'
     )
 
     fig.update_coloraxes(showscale=False)
