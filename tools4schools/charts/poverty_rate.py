@@ -55,7 +55,7 @@ def make_fig():
         lat = df2['latitude'],
         text = df2["school_name"],
         marker_color='white',
-        marker_size=df2['college_enroll_pct'] * 20,
+        marker_size=df2['college_enroll_pct'] * 0.2,
         showlegend=True,
         visible=False))
         

@@ -5,13 +5,10 @@ import json
 import geopandas as gpd
 from pandas.io.json import json_normalize
 from pathlib import Path
-import scatter, air_pollution, college, poverty_rate, budget
+from tools4schools.charts import scatter, college, poverty_rate, budget
 
 
 def run_all():
-    home_path = Path(__file__).parent.parent
-    data_path = home_path.joinpath("data/results")
-    data_path_geo = home_path.joinpath("data/geojson")
 
     scatter_fig = scatter.make_fig()
     college_fig = college.make_fig()
@@ -71,7 +68,7 @@ def run_all():
                 direction="left",
                 pad={"r": 10, "t": 10},
                 showactive=True,
-                x=0.0,
+                x=0.2,
                 xanchor="left",
                 yanchor="top"
 
@@ -80,7 +77,4 @@ def run_all():
         ]
 
     )
-    fig.show()
-    return None
-
-run_all()
+    return fig
