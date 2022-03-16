@@ -13,4 +13,4 @@ school_budgets_df = school_budgets_df.rename(columns={"Unit": "oracle_id","Unit 
 school_budgets_df = school_budgets_df.astype({"oracle_id": str, "school_name": str})
 school_budgets_df["FY 2017 Ending Budget"] = pd.to_numeric(school_budgets_df["FY 2017 Ending Budget"].str.replace(",",""))
 school_budgets_df= school_budgets_df[school_budgets_df["FY 2017 Ending Budget"] != 0]
-school_budgets_df.to_csv('/data/cps/cps_budgets_2017.csv', index=False)
+#school_budgets_df.to_csv('/data/cps/cps_budgets_2017.csv', index=False)
