@@ -5,7 +5,7 @@ import json
 import geopandas as gpd
 from pandas.io.json import json_normalize
 from pathlib import Path
-from tools4schools.charts import scatter, air_pollution
+import scatter, air_pollution, college, poverty_rate
 
 
 def run_all():
@@ -14,12 +14,15 @@ def run_all():
     data_path_geo = home_path.joinpath("data/geojson")
 
     scatter_fig = scatter.make_fig()
-    air_fig = air_pollution.make_fig()
+    college_fig = college.make_fig()
+    poverty_fig = poverty_rate.make_fig()
+
     fig = go.Figure()
 
-    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_geos(fitbounds="locations", visible=True)
     fig.add_traces(scatter_fig.data)
-    fig.add_traces(air_fig.data)
+    fig.add_traces(college_fig.data)
+    fig.add_traces(poverty_fig.data)
 
 
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
@@ -29,17 +32,21 @@ def run_all():
         updatemenus=[
             dict(
                 buttons=list([
-                    dict(label="Opportunity Index",
+                    dict(label="Opportunity Index by School",
                          method="update",
-                         args=[{"visible": [True, True, False]},
+                         args=[{"visible": [False,True,True,True,True,True,False,False,False]},
                                {"title": "Opportunity index mapping"}]),
-                    dict(label="Air Pollution",
+                    dict(label="College Enrollment Percentage by School",
                          method="update",
-                         args=[{"visible": [True, True, True]},
-                               {"title": "Air pollution index mapping"}])
+                         args=[{"visible": [False, False,False,False,False,False,True,True,False]},
+                               {"title": "College enrollment index mapping"}]),
+                    dict(label="Poverty Rate x College Enrollment",
+                         method="update",
+                         args=[{"visible": [False,False,False,False,False,False,False,False,True,True]},
+                               {"title": "College enrollment index mapping to poverty rate"}])
                 ]),
                 type = "buttons",
-                direction="right",
+                direction="left",
                 pad={"r": 10, "t": 10},
                 showactive=True,
                 x=0.5,
@@ -51,5 +58,7 @@ def run_all():
         ]
 
     )
+    fig.show()
+    return None
 
-    return fig
+run_all()

@@ -7,7 +7,7 @@ from pathlib import Path
 
 def make_fig():
     home_path = Path(__file__).parent.parent
-    data_path = home_path.joinpath("data")
+    data_path = home_path.joinpath("data/environmental")
     data_path_geo = home_path.joinpath("data/geojson")
 
 
