@@ -1,18 +1,15 @@
 '''
-CS 30122
-Nivedita Vatsa
-
-Construct class
+CS 30122: tools4schools
+Calculate opportunity index.
 '''
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import StandardScaler
 from opportunity import Opportunity
 
-#Set directories
+# set directories
 data_dir = "../data/"
 out_dir = data_dir + "results/"
 
+# specify Opportunity class parameters
 id_vars = ['School ID', 'School Name', 'ncessch', 'school_id',
     'school_name', 'leaid', 'latitude', 'longitude',
     'census_tract', 'enrollment_crdc']
@@ -38,12 +35,12 @@ scaler_dict = {"teacher_count": 'teachers_certified_fte_crdc',
                "census_households": "tot_hhld_census_tract"}
 
 
-# instance of Opportunity class
+# define instance of Opportunity class
 consolidated = pd.read_csv(out_dir + 'consolidated.csv')
-Opp = Opportunity(consolidated, id_vars, to_scale_dict, outcome_var, scaler_dict, out_dir)
+Opp = Opportunity(consolidated, id_vars, to_scale_dict, scaler_dict, outcome_var, out_dir)
 
 # export to see what the data look like before processing
 Opp.export_df('indicators_by_school_unscaled.csv', keep_ind = True)
 
-# generate opportunity index
+# generate opportunity index and export results
 Opp.get_opp_index(export = True)

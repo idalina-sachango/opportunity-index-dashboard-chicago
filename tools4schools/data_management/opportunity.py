@@ -2,8 +2,11 @@
 CS 30122
 Nivedita Vatsa
 
-Construct class
+Construct class to house data on student
+opportunity. Define methods to construct an
+index to measure opportunity.
 '''
+
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
@@ -11,12 +14,21 @@ from sklearn.preprocessing import StandardScaler
 
 class Opportunity():
     '''
-    xx
+    Opportunity class to analyze school-level data.
     '''
-    def __init__(self, dat, id_vars, to_scale_dict, outcome_var, scaler_dict,
-                 out_dir):
+    def __init__(self, dat, id_vars, to_scale_dict, scaler_dict, outcome_var,
+                    out_dir = None):
         '''
-        xx
+        Constructor:
+        - dat: Pandas dataframe with school-level data
+        - id_vars (list of str): Variables that identify the data
+        - to_scale_dict: dictionary mapping a scaling specification (str)
+            to a list of variables names to scale (str).
+        - scaler_dict: Dictionary mapping a scaling specification (str)
+            to the name of the corresponding scaling variable (str).
+        - outcome_var: Outcome variable (str) to withold from scaling
+            and standardization operations
+        - out_dir: Directory to export the data
         '''
         self.dat = dat
         self.id_vars = id_vars
@@ -26,10 +38,24 @@ class Opportunity():
         self.scaler_dict = scaler_dict
         self.out_dir = out_dir
 
+        vars_used = (self.id_vars +
+                     self.outcome_var +
+                     self.indicator_lst +
+                     list(self.scaler_dict.values()))
+        for var in vars_used:
+            assert var in self.dat.columns, "{} not in data".format(var)
+
 
     def export_df(self, fname, keep_ind = False, keep_opp_idx = False):
         '''
-        xx
+        Export dataset to csv.
+
+        Inputs:
+        - fname (str): Name of exported file
+        - keep_ind (bool): Indicates whether to export indicator variables
+        - keep_opp_indx (bool): Indicates whether to export opportunity index
+
+        Returns: Nothing. Exports a csv.
         '''
         vars_to_keep = self.id_vars + self.outcome_var
         if keep_ind:
@@ -43,7 +69,13 @@ class Opportunity():
     
     def get_betas(self):
         '''
-        xx
+        Calculate the weights for the opportunity index.
+        Regress outcome variable on each indicator variable and
+        derive a beta coefficient. 
+
+        Inputs: self
+
+        Returns (dict): Dictionary mapping each indicator to a weight.
         '''
         beta_dict = {}
         for x_var in self.indicator_lst:
@@ -63,7 +95,8 @@ class Opportunity():
 
         Inputs:
         - dat: A Pandas dataframe
-        - vars_to_impute (str): list of var string names to impute
+        - export (bool): Indicates whether to export dataframe
+            after performing the operation
 
         Returns: Nothing.  Updates dataframe in place.
         '''
@@ -80,13 +113,12 @@ class Opportunity():
         scaling variable.
 
         Inputs:
-        - dat: A Pandas dataframe.
-        - to_scale_dict: Dictionary mapping a scaling specification
-            to a list of variables to scale.
-        - scaler_dict: Dictionary mapping a scaling specification
-            to a scaling variable.
+        - self
+        - export (bool): Indicates whether to export dataframe
+            after performing the operation
         
-        Returns: Nothing. Re-scales dataframe in place.
+        Returns: Nothing. Re-scales variables in place.
+            Exports csv if specified.
         '''
         for scaler_spec, scaler_var in self.scaler_dict.items():
             for var in self.to_scale_dict[scaler_spec]:
@@ -98,7 +130,16 @@ class Opportunity():
 
     def standardize_df(self, export = False):
         '''
-        xx
+        Standardizes all indicator variables so that they have a mean
+        of 0 and a standard deviation of 1.
+
+        Inupts:
+        - self
+        - export (bool): Indicates whether to export dataframe
+            after performing the operation
+
+        Returns: Nothing. Standardizes variables in place.
+            Exports csv if specified.
         '''
         self.dat[self.indicator_lst] = StandardScaler().fit_transform(
                                         self.dat[self.indicator_lst])
@@ -109,6 +150,11 @@ class Opportunity():
     
     def run_prep_steps(self):
         '''
+        Execute data preparation steps and calculate weights.
+
+        Input: self
+
+        Returns (dict): Dictionary mapping each indicator to a weight.
         '''
         # scale all variables
         self.scale_df(export = True)
@@ -127,7 +173,15 @@ class Opportunity():
     
     def get_opp_index(self, export = False):
         '''
-        xx
+        Calculate opportunity index.
+
+        Inputs:
+        - self
+        - export (bool): Indicates whether to export dataframe
+            after performing the operation
+
+        Returns: Nothing. Adds column for opportunity index in place.
+            Exports csv if specified.
         '''
         beta_dict = self.run_prep_steps()
 
