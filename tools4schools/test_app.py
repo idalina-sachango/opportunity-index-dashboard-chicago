@@ -2,7 +2,8 @@
 import dash
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output
-from tools4schools.charts import scatter, air_pollution
+from tools4schools.charts import scatter, enroll_scatter
+import flask
 import pandas as pd
 from pathlib import Path
 
@@ -13,12 +14,15 @@ external_stylesheets = [
         "rel": "stylesheet",
     },
 ]
+
+server = flask.Flask(__name__)
 ### Dash App
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, server = server, external_stylesheets=external_stylesheets)
 
 
-### Figure 1
+### Figures
 scatter_fig = scatter.make_fig()
+enroll_scatter_fig = enroll_scatter.make_fig()
 #air_pollution_fig = air_pollution.make_fig()
 
 
@@ -26,19 +30,20 @@ scatter_fig = scatter.make_fig()
 
 ### Table Data
 home_path = Path(__file__).parent
-data_path = home_path.joinpath("data")
+data_path = home_path.joinpath("data/results")
 df1 = pd.read_csv(data_path.joinpath('opportunity_index_by_school_scaled.csv'))
 df2 = pd.read_csv(data_path.joinpath('indicators_by_school_unscaled.csv'))
 
-merged_df = pd.merge(df1, df2, how='left')
+merged_df = pd.merge(df1[['opportunity_index', 'ncessch', 'enrollment_crdc']], df2, how='left')
 
 table_df = merged_df[['school_name', 'census_tract', 'opportunity_index',
-       'college_enrollment_pct', 'free_or_reduced_price_lunch',
+       'college_enroll_pct', 'free_or_reduced_price_lunch',
        'teachers_certified_fte_crdc', 'counselors_fte_crdc',
        'law_enforcement_fte_crdc', 'salaries_crdc', 'enrl_AP_crdc',
-       'above_pov_rate', 'internet_rate', 'emp_rate_25_64',
+       'enrollment_crdc', 'above_pov_rate', 'internet_rate', 'emp_rate_25_64',
        'FY 2017 Ending Budget', 'food_stamps', 'median_earnings',
        'ds_pm_pred']]
+
 
 def generate_table(dataframe):
     '''
@@ -55,6 +60,7 @@ def generate_table(dataframe):
             {'name': 'School Name', 'id': 'school_name', 'type': 'text'},
             {'name': 'Census Tract', 'id': 'census_tract', 'type': 'numeric'},
             {'name': 'Opportunity Index', 'id': 'opportunity_index', 'type': 'numeric'},
+            {'name': 'Student Enrollment', 'id': 'enrollment_crdc', 'type': 'numeric'},
             {'name': '% College enrollment', 'id': 'college_enrollment_pct', 'type': 'numeric'},
             {'name': 'Free or Reduced Price Lunch', 'id': 'free_or_reduced_price_lunch', 'type': 'numeric'},
             {'name': '# Certified Teachers', 'id': 'teachers_certified_fte_crdc', 'type': 'numeric'},
@@ -69,7 +75,7 @@ def generate_table(dataframe):
             {'name': '% Households on Food Stamps', 'id': 'food_stamps', 'type': 'numeric'},
             {'name': 'Median Household Income', 'id': 'median_earnings', 'type': 'numeric'}
             ],
-            style_table={'height': 400,},
+            style_table={'height': 400,'overflowX': 'auto',},
             style_data={
                         'width': '150px', 'minWidth': '150px', 'maxWidth': '150px',
                         'overflow': 'hidden',
@@ -92,7 +98,7 @@ app.layout = html.Div(
             children = [
             html.H1(children="Opportunity Index on College Outcomes",
                     className="header-title",),
-            html.P(children = "Analyzes Chicago Public School performance on \
+            html.P(children = "Analyzes Chicago Public Schools High School performance on \
                             College Outcomes for the year 2017.",
                     className="header-description",),
             ],
@@ -101,14 +107,24 @@ app.layout = html.Div(
         html.Div(
             children = [
                 html.Div(
-                    children = ['College enrollment by school',
-                        dcc.Graph(
-                            id = 'Map scatter',
+                    children=[
+                            html.H3('CPS High Schools by Opportunity Index'),
+                            dcc.Graph(
+                            id = 'map-scatter',
                             figure = scatter_fig),],
-                    className="card",
+                    className="six columns",
+                ),
+                html.Div(
+                    children=[
+                            html.H3("Opportunity Index and College Enrollment for \
+                            Chicago High Schools in 2017"),
+                            dcc.Graph(
+                            id = 'enroll-scatter',
+                            figure = enroll_scatter_fig),],
+                    className="six columns",
                 ),
                 ],
-        className="wrapper",),
+        className="row",),
         html.Div(
                 dcc.Dropdown(id='dropdown',
                             options=[{'label': i, 'value': i} \
