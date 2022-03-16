@@ -10,4 +10,4 @@ results_df = pd.DataFrame.from_records(results)
 illinois_air = results_df[results_df["statefips"] == "17"]
 chi_county_fips = ["31", "43", "89", "97", "111", "197"]
 chi_air = illinois_air[illinois_air["countyfips"].isin(chi_county_fips)]
-#chi_air.to_csv("/data/environmental/chi_air.csv", index=False)
+chi_air.to_csv("data/environmental/chi_air.csv", index=False)

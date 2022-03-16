@@ -19,4 +19,4 @@ col_names = ["name", "food_stamps", "median_earnings", "state", "county", "tract
 census_df = pd.DataFrame(columns=col_names, data=r.json()[1:])
 census_df = census_df.astype({"name": str, "state": str,"county": str, "tract": str, 
      "median_earnings": int, "food_stamps": int})
-#census_df.to_csv("/data/economic/income_food_stamps.csv", index=False)
+census_df.to_csv("data/economic/income_food_stamps.csv", index=False)
