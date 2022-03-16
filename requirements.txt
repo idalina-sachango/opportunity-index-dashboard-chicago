@@ -5,6 +5,7 @@ click-plugins==1.1.1
 cligj==0.7.2
 cycler==0.11.0
 dash==2.2.0
+flask==2.0.3
 Fiona==1.8.21
 fonttools==4.29.1
 geopandas==0.10.2
