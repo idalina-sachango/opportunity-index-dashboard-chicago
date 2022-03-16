@@ -19,7 +19,7 @@ library(educationdata)
 library(tidyverse)
 
 # set directory
-export_dir<- paste0("../data/ccd_crdc/")
+export_dir<- paste0("../../data/ccd_crdc/")
 
 ###############################################################
 # User-Written Functions
