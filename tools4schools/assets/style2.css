@@ -485,8 +485,8 @@ a {
   padding-bottom: 12px;
 }
 .Select-control, .Select-menu-outer, .Select-multi-value-wrapper, .select-up, .is-open .Select-control {
-  background-color: #1E1E1E;
-  color: white;
+  background-color: #fdfafa;
+  color: rgb(10, 10, 10);
 
 }
 
