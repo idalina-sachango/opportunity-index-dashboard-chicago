@@ -6,13 +6,12 @@ from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
 import json
+import numpy as np
 
 #def make_fig():
 home_path = Path(__file__).parent.parent 
-data_path = home_path.joinpath("Project/Output")
-data_path_geo = home_path.joinpath("data")
-
-
+data_path = home_path.joinpath("data/results")
+data_path_geo = home_path.joinpath("data/geojson")
 
 def open_path(filename, feature):
     with open(data_path_geo.joinpath(filename)) as f:
@@ -27,12 +26,11 @@ census_df["blank_bounds"] = 0
 census_df = census_df[["geoid10", "blank_bounds"]]
 
 fig = go.Figure()
-df = pd.read_csv(data_path.joinpath("indicators_by_school_scaled.csv"), dtype={"census_tract_x": str})
+df = pd.read_csv(data_path.joinpath("indicators_by_school_per_unit.csv"), dtype={"census_tract": str})
 df = df.fillna(999)
 df = pd.DataFrame(df)
 df["blank_bounds"] = 0
-df.rename(columns={"FY 2017 Ending Budget": "budget_per_student", "census_tract_x": "ctfips", \
-"latitude_x": "lat", "longitude_x": "lon", "School Name": "school_name"}, inplace=True)
+df.rename(columns={"FY 2017 Ending Budget": "budget_per_student"}, inplace=True)
 
 
 #create intervals for bubble size
@@ -63,7 +61,21 @@ fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
     hovermode='x')
 
 #create bubbles
-# df["grouping"] = pd.cut(df["budget_per_student"], bins=list(range(0, 60000, 10000)), labels=["a", "b", "c", "d", "e"])
+#df["grouping"] = pd.cut(df["enrollment_crdc"], bins=list(range(0, 2000, 4000)), labels=["small", "medium", "large"])
+colors = {"small": "#8F00FF", "medium": "#6495ED", "large": "#FFBF00"}
+df['grouping'] = np.select(
+    [
+        df["enrollment_crdc"].between(0, 200, inclusive=False), 
+        df["enrollment_crdc"].between(200, 1000, inclusive=False),
+        df["enrollment_crdc"].between(1000, 5000, inclusive=False),
+    ], 
+    [
+        'Small', 
+        'Medium',
+        'Large'
+    ], 
+    default='Unknown'
+)
 # for label in df["grouping"].unique():
 #     df_sub = df[[df["grouping"] == label]]
 # fig.add_trace(px.scatter_geo(df, locationmode = 'USA-states', size = "budget_per_student", 
@@ -71,12 +83,20 @@ fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
 # text = "School Name"))
 
 for _, row in df.iterrows():
+    if row.grouping == "Small":
+        shade = colors["small"]
+    elif row.grouping == "Medium":
+        shade = colors["medium"]
+    else:
+        row.grouping == "Large"
+        shade = colors["large"]
     fig.add_trace(go.Scattergeo(
-    lat = [row.lat],
-    lon = [row.lon],
+    lat = [row.latitude],
+    lon = [row.longitude],
     showlegend = False,
     marker = dict(size = (row.budget_per_student) * 0.002,
-    color = 'rgb(93, 164, 214)', 
+    color = shade, 
+    opacity = 0.5,
     line_color='rgb(40,40,40)', 
     line_width=0.5,
     sizemode = 'area'),
@@ -118,6 +138,22 @@ for _, row in df.iterrows():
 # hovermode='x', title_text = 'Budget per Student',
 # geo_scope='usa') 
 fig.update_coloraxes(showscale=False)
+fig.update_layout(
+    legend=dict(
+        x=0,
+        y=1,
+        traceorder="reversed",
+        title_font_family="Times New Roman",
+        font=dict(
+            family="Courier",
+            size=12,
+            color="black"
+        ),
+        bgcolor="LightSteelBlue",
+        bordercolor="Black",
+        borderwidth=2
+    )
+)
 #fig.update_traces(show_legend = False)
 fig.show()
     #return fig
