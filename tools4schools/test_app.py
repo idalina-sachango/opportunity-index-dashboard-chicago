@@ -2,7 +2,7 @@
 import dash
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output
-from tools4schools.charts import scatter, enroll_scatter
+from tools4schools.charts import run_all, enroll_scatter
 import flask
 import pandas as pd
 from pathlib import Path
@@ -21,9 +21,8 @@ app = dash.Dash(__name__, server = server, external_stylesheets=external_stylesh
 
 
 ### Figures
-scatter_fig = scatter.make_fig()
+run_all_fig = run_all.run_all()
 enroll_scatter_fig = enroll_scatter.make_fig()
-#air_pollution_fig = air_pollution.make_fig()
 
 
 ### Table
@@ -107,13 +106,11 @@ app.layout = html.Div(
         html.Div(
             children = [
                 html.Div(
-                    children=[
-                            html.H3('CPS High Schools by Opportunity Index'),
-                            dcc.Graph(
-                            id = 'map-scatter',
-                            figure = scatter_fig),],
-                    className="six columns",
-                ),
+                    children = ['Chicago Maps',
+                        dcc.Graph(
+                            id = 'Maps',
+                            figure = run_all_fig),],
+                    className="card",),
                 html.Div(
                     children=[
                             html.H3("Opportunity Index and College Enrollment for \
@@ -121,7 +118,7 @@ app.layout = html.Div(
                             dcc.Graph(
                             id = 'enroll-scatter',
                             figure = enroll_scatter_fig),],
-                    className="six columns",
+                    className="row",
                 ),
                 ],
         className="row",),
@@ -134,18 +131,7 @@ app.layout = html.Div(
                             #         'color': 'white'},
                             placeholder='Filter by School name...',),
                                             ),
-        html.Div(id='table-container'),
-        # html.Div(
-        #     children = [
-        #         html.Div(
-        #             children = ['Heat map of air pollution',
-        #                 dcc.Graph(
-        #                     id = 'Map choropleth',
-        #                     figure = air_pollution_fig),],
-        #             className="card",
-        #         ),
-        #         ],
-        # className="wrapper",)
+        html.Div(id='table-container')
     ]
 )
 

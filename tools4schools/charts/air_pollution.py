@@ -29,7 +29,8 @@ def make_fig():
             locations=df2["ctfips"],
             z = df2["ds_pm_pred"],
             autocolorscale=True,
-            showscale = False
+            showscale = False,
+            visible=False
         ))
 
     fig.update_geos(fitbounds="locations", visible=True)
