@@ -66,6 +66,7 @@ def generate_table(dataframe):
                         'overflow': 'hidden',
                         'textOverflow': 'ellipsis',
                     },
+            filter_action='native',
             page_size=10)
     return table
 
