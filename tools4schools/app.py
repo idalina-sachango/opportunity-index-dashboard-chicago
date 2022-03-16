@@ -3,7 +3,6 @@ Dash App for Tools4Schools
 
 Output layout including 3 visulations and a table of
 the resulting data using callbacks
-
 '''
 from pathlib import Path
 from dash import dcc, html, dash_table
@@ -66,6 +65,7 @@ def generate_table(dataframe):
                         'overflow': 'hidden',
                         'textOverflow': 'ellipsis',
                     },
+            filter_action='native',
             page_size=10)
     return table
 
@@ -129,11 +129,11 @@ app.layout = html.Div(
         html.Div(
             children = [
                 html.Div(
-                    children = ['Chicago Maps',
+                    children = [
                         dcc.Graph(
                             id = 'Maps',
                             figure = run_all_fig),],
-                    className="card",),
+                    className="row",),
                 html.Div(
                     children=[
                             html.H3("Opportunity Index and College Enrollment for \
@@ -150,8 +150,6 @@ app.layout = html.Div(
                             options=[{'label': i, 'value': i} \
                                 for i in table_df['school_name'].unique()],
                             multi=True,
-                            # style={'backgroundColor': 'rgb(50, 50, 50)',
-                            #         'color': 'white'},
                             placeholder='Filter by School name...',),
                                             ),
         html.Div(id='table-container')

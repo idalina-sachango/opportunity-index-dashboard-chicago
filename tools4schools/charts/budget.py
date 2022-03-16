@@ -8,6 +8,14 @@ import numpy as np
 
 
 def make_fig():
+    """
+    Create the plotly figure that corresponds to
+    the indicator of interest. Sets the path to files,
+    opens geojson's, and does any figure specific
+    transformations.
+    Inputs: None
+    Outputs: Plotly figure
+    """
     home_path = Path(__file__).parent.parent 
     data_path = home_path.joinpath("data/results")
     data_path_geo = home_path.joinpath("data/geojson")
@@ -33,21 +41,14 @@ def make_fig():
     df["blank_bounds"] = 0
     df.rename(columns={"FY 2017 Ending Budget": "budget_per_student"}, inplace=True)
 
-
-    #create base census tract map
     fig.add_trace(go.Choropleth(geojson=census_tract,featureidkey="properties.geoid10",
         locations=census_df["geoid10"],
         z = census_df["blank_bounds"],
         showscale=False,
+        visible=False
     ))
 
-    fig.update_geos(fitbounds="locations", visible=True)
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
-        hovermode='x')
-
-
-    #create bubbles
-    colors = {"Small School": "#8F00FF", "Medium School": "#6495ED", "Large School": "#FFBF00"}
+    colors = {"Small": "#8F00FF", "Medium": "#6495ED", "Large": "#FFBF00"}
     df['grouping'] = np.select(
         [
             df["enrollment_crdc"].between(0, 200, inclusive=False), 
@@ -55,9 +56,9 @@ def make_fig():
             df["enrollment_crdc"].between(1000, 5000, inclusive=False),
         ], 
         [
-            'Small School', 
-            'Medium School',
-            'Large School'
+            'Small', 
+            'Medium',
+            'Large'
         ], 
         default='Unknown'
     )
@@ -68,6 +69,7 @@ def make_fig():
         lat = df["latitude"][df["grouping"] == label],
         lon = df["longitude"][df["grouping"] == label],
         showlegend = True,
+        legendgrouptitle=dict(text='School Size'),
         marker = dict(size = (df["budget_per_student"][df["grouping"] == label]) * 0.02,
         color = colors[label], 
         opacity = 0.5,
@@ -78,10 +80,15 @@ def make_fig():
         text = pd.Series(df["school_name"][df["grouping"] == label]),
         customdata= pd.Series(round(df["budget_per_student"][df["grouping"] == label], 2)),
         hovertemplate='<b>School Name<extra></extra></b>: %{text}<br>' + 
-                                        '<b>Budget per Student:</b> %{customdata}',
-        hoverinfo = "text"
+                                        '<b>Budget per Student:</b> %{customdata:$,.2f}',
+        hoverinfo = "text",
+        visible=False
         ))
 
     fig.update_coloraxes(showscale=False)
     fig.update_layout(legend_title = "School Size")
+
+    fig.update_geos(fitbounds="locations", visible=True)
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+        hovermode='x')
     return fig

@@ -1,11 +1,18 @@
+import json
+from pathlib import Path
 import plotly.graph_objects as go
 import pandas as pd
-import json
-from pandas.io.json import json_normalize
-from pathlib import Path
 
 
 def make_fig():
+    """
+    Create the plotly figure that corresponds to
+    the indicator of interest. Sets the path to files,
+    opens geojson's, and does any figure specific
+    transformations.
+    Inputs: None
+    Outputs: Plotly figure
+    """
     home_path = Path(__file__).parent.parent
     data_path = home_path.joinpath("data/environmental")
     data_path_geo = home_path.joinpath("data/geojson")
@@ -29,16 +36,17 @@ def make_fig():
             locations=df2["ctfips"],
             z = df2["ds_pm_pred"],
             autocolorscale=True,
-            showscale = False,
+            showscale = True,
+            colorbar_title='24-hour average PM2.5 concentration in μg/m3',
+            reversescale=True,
             visible=False
         ))
 
+    fig.update_layout(
+        geo_scope='usa'
+    )
+
     fig.update_geos(fitbounds="locations", visible=True)
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-
-    fig.update_layout(
-        title_text = 'Air Quality By Census Tract',
-        geo_scope='usa', # limite map scope to USA
-    )
 
     return fig

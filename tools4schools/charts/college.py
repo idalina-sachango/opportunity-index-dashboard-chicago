@@ -1,12 +1,20 @@
+import json
+from pathlib import Path
 import plotly.graph_objects as go
 import pandas as pd
-import json
 import geopandas as gpd
-from pandas.io.json import json_normalize
-from pathlib import Path
+
 
 
 def make_fig():
+    """
+    Create the plotly figure that corresponds to
+    the indicator of interest. Sets the path to files,
+    opens geojson's, and does any figure specific
+    transformations.
+    Inputs: None
+    Outputs: Plotly figure
+    """
     home_path = Path(__file__).parent.parent
     data_path = home_path.joinpath("data/results")
     data_path_geo = home_path.joinpath("data/geojson")
@@ -23,36 +31,36 @@ def make_fig():
     census_df["blank_bounds"] = 0
     census_df = census_df[["geoid10", "blank_bounds"]]
 
-    #cps_locations = open_path("cps-geojson.geojson", "school_id")
     census_tract = open_path("census_tract.geojson", "geoid10")
 
-    df2 = pd.read_csv(data_path.joinpath("indicators_by_school_unscaled.csv"), dtype={"School ID": str})
-    df2 = pd.DataFrame(df2)
-    df2 = df2.assign(college_ranked = pd.qcut(df2.college_enroll_pct, 5, labels = [1, 2, 3, 4, 5]))
+    df = pd.read_csv(data_path.joinpath("indicators_by_school_unscaled.csv"),
+                      dtype={"School ID": str})
+    df = pd.DataFrame(df)
+    df = df.assign(college_ranked = pd.qcut(df.college_enroll_pct, 5, labels = [1, 2, 3, 4, 5]))
 
     fig = go.Figure()
-    
 
-    #plot bubbles with cps college data
+
     fig.add_trace(go.Scattergeo(
-        lon = df2['longitude'],
-        lat = df2['latitude'],
-        text = df2["school_name"],
-        marker_color=df2['college_enroll_pct'],
-        marker_cmin=min(df2["college_enroll_pct"]),
-        marker_cmax=max(df2["college_enroll_pct"]),
+        lon = df['longitude'],
+        lat = df['latitude'],
+        text = df["school_name"],
+        marker_color=df['college_enroll_pct'],
+        marker_cmin=min(df["college_enroll_pct"]),
+        marker_cmax=max(df["college_enroll_pct"]),
         marker_colorbar=dict(thickness=20),
+        marker_colorbar_title='College Enrollment Percentage',
         marker_colorscale='blues',
         marker_size=10,
-        showlegend=True,
+        showlegend=False,
         visible=False))
-        
 
-    fig.update_traces(customdata=df2["college_enroll_pct"])
-    fig.update_traces(hovertemplate='<b>School Name<extra></extra></b>: %{text}<br>' + 
-                                    '<b>Opportunity Index:</b> %{customdata}')
 
-    # draw census tract boundariess
+    fig.update_traces(customdata=df["college_enroll_pct"])
+    fig.update_traces(hovertemplate='<b>School Name<extra></extra></b>: %{text}<br>' +
+                                    '<b>College Enrollment Percentage:</b> %{customdata}')
+
+
     fig.add_trace(go.Choropleth(
         geojson=census_tract,
         featureidkey="properties.geoid10",
@@ -60,21 +68,18 @@ def make_fig():
         z = census_df["blank_bounds"],
         showscale=False,
         hoverinfo='skip',
-        visible=False,
-        colorbar_title='College Enrollment Percentage'
+        visible=False
     ))
 
     fig.update_geos(fitbounds="locations", visible=False)
-    
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
-    hovermode='x unified')
 
     fig.update_layout(
         title_text = 'College Enrollment by School',
-        geo_scope='usa', # limite map scope to USA,
+        geo_scope='usa'
     )
 
     fig.update_coloraxes(showscale=False)
 
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+    hovermode='x unified')
     return fig
-

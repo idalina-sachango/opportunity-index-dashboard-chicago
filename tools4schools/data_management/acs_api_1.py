@@ -8,12 +8,9 @@ Pulls Census Tract level estimates for
     - Internet Access
     - Unemployment Rate for Population aged 25-64
 '''
-from pathlib import Path
+
 import requests
 import pandas as pd
-
-home_path = Path(__file__).parent.parent.parent
-data_path = home_path.joinpath("data/acs")
 
 
 census_key = "80ce9e2377354fe9a313a005f010ab4ce8b17b8b"
@@ -40,4 +37,4 @@ df = df.assign(internet_rate = 100 * (df.tot_hhld_int / df.tot_hhld),
                 emp_rate_25_64 = 100 - df.unemp_rate_25_64,
                 above_pov_rate = 100 - df.pov_rate)
 
-df.to_csv(data_path.joinpath('acs_data_1.csv'))
+df.to_csv('../data/acs/acs_data_1.csv')
