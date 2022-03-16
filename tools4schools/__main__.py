@@ -1,4 +1,4 @@
-from tools4schools.test_app import app
+from tools4schools.app import app
 
 #### Call the app
 if __name__ == '__main__':
