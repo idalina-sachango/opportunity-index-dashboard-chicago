@@ -289,6 +289,13 @@ scaler_dict = {"teacher_count": 'teachers_certified_fte_crdc',
                "student_count": "enrollment_crdc",
                "census_households": "tot_hhld_census_tract"}
 
+
+##########FOR CLASS IMPLEMENTATION############
+consolidated.to_csv(out_dir + 'consolidated.csv', index = False)
+##############################################
+
+
+
 # EXPORT RAW DATA (UNSCALED)
 indicators_by_school_unscaled = consolidated[id_vars + outcome_var + indicator_lst]
 indicators_by_school_unscaled.to_csv((out_dir +
@@ -298,9 +305,17 @@ indicators_by_school_unscaled.to_csv((out_dir +
 # SCALE
 scale_df(consolidated, to_scale_dict, scaler_dict)
 
+indicators_by_per_unit = consolidated[id_vars + outcome_var + indicator_lst]
+indicators_by_per_unit.to_csv((out_dir +
+                                      'indicators_by_school_per_unit.csv'),
+                                      index = False)
+
 # IMPUTE MISSING VALUES
 for var in indicator_lst:
     impute_w_mean(consolidated, var)
+
+
+
 
 # STANDARDIZE
 to_std = indicator_lst + outcome_var
