@@ -11,7 +11,6 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
-
 class Opportunity():
     '''
     Opportunity class to analyze school-level data.
@@ -104,7 +103,8 @@ class Opportunity():
             self.dat[var].fillna((self.dat[var].mean()), inplace=True)
 
         if export:
-            self.export_df('indicators_by_school_imputed.csv', keep_ind = True)
+            self.export_df('indicators_by_school_imputed.csv',
+                            keep_ind = True)
 
 
     def scale_df(self, export = True):
@@ -125,7 +125,8 @@ class Opportunity():
                 self.dat[var] = self.dat[var] / self.dat[scaler_var]
 
         if export:
-            self.export_df('indicators_by_school_per_unit.csv', keep_ind = True)
+            self.export_df('indicators_by_school_per_unit.csv',
+                            keep_ind = True)
 
 
     def standardize_df(self, export = False):
@@ -145,7 +146,8 @@ class Opportunity():
                                         self.dat[self.indicator_lst])
 
         if export:
-            self.export_df('indicators_by_school_scaled.csv', keep_ind = True)
+            self.export_df('indicators_by_school_scaled.csv',
+                            keep_ind = True)
 
     
     def run_prep_steps(self):
@@ -156,7 +158,7 @@ class Opportunity():
 
         Returns (dict): Dictionary mapping each indicator to a weight.
         '''
-        # scale all variables
+        # scale all variables by a specified denominator
         self.scale_df(export = True)
 
         # impute missing values
@@ -197,4 +199,5 @@ class Opportunity():
                                           * (100 / range)).round(2)
 
         if export:
-            self.export_df('opportunity_index_by_school_scaled.csv', keep_ind = False, keep_opp_idx = True)
+            self.export_df('opportunity_index_by_school_scaled.csv',
+                            keep_ind = False, keep_opp_idx = True)

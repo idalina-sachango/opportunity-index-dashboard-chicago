@@ -37,10 +37,16 @@ scaler_dict = {"teacher_count": 'teachers_certified_fte_crdc',
 
 # define instance of Opportunity class
 consolidated = pd.read_csv(out_dir + 'consolidated.csv')
-Opp = Opportunity(consolidated, id_vars, to_scale_dict, scaler_dict, outcome_var, out_dir)
+Opp = Opportunity(consolidated,
+                  id_vars,
+                  to_scale_dict,
+                  scaler_dict,
+                  outcome_var,
+                  out_dir)
 
 # export to see what the data look like before processing
-Opp.export_df('indicators_by_school_unscaled.csv', keep_ind = True)
+Opp.export_df('indicators_by_school_unscaled.csv',
+              keep_ind = True)
 
 # generate opportunity index and export results
 Opp.get_opp_index(export = True)
