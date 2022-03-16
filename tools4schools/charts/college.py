@@ -75,6 +75,7 @@ def make_fig():
     )
 
     fig.update_coloraxes(showscale=False)
+    fig.update_layout(legend_title = "College Enrollment Percentage")
 
     return fig
 

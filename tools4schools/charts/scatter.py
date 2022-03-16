@@ -95,10 +95,11 @@ def make_fig():
     hovermode='x unified')
 
     fig.update_layout(
-        title_text = 'College Enrollment by School',
+        # title_text = 'College Enrollment by School',
         geo_scope='usa'
     )
 
     fig.update_coloraxes(showscale=False)
+    fig.update_layout(legend_title = "Opportunity Index Rankings")
 
     return fig

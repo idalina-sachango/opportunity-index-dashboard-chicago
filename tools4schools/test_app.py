@@ -106,11 +106,12 @@ app.layout = html.Div(
         html.Div(
             children = [
                 html.Div(
-                    children = ['Chicago Maps',
+                    children = [
+                        html.H3('Chicago Maps'),
                         dcc.Graph(
                             id = 'Maps',
                             figure = run_all_fig),],
-                    className="card",),
+                    className="row",),
                 html.Div(
                     children=[
                             html.H3("Opportunity Index and College Enrollment for \

@@ -84,7 +84,7 @@ def make_fig():
     hovermode='x unified')
 
     fig.update_layout(
-        title_text = 'Poverty Rate',
+        # title_text = 'Poverty Rate',
         geo_scope='usa', # limite map scope to USA,
     )
 

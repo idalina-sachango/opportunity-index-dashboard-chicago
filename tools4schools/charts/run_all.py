@@ -33,7 +33,7 @@ def run_all():
                 buttons=list([
                     dict(label="Opportunity Index by School",
                          method="update",
-                         args=[{"visible": [False,True,True,
+                         args=[{"visible": [True,True,True,
                                             True,True,True,
                                             False,False,False,
                                             False,False,False,

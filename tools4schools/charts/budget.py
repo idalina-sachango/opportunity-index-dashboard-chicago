@@ -39,6 +39,7 @@ def make_fig():
         locations=census_df["geoid10"],
         z = census_df["blank_bounds"],
         showscale=False,
+        visible=False
     ))
 
     fig.update_geos(fitbounds="locations", visible=True)
@@ -79,7 +80,8 @@ def make_fig():
         customdata= pd.Series(round(df["budget_per_student"][df["grouping"] == label], 2)),
         hovertemplate='<b>School Name<extra></extra></b>: %{text}<br>' + 
                                         '<b>Budget per Student:</b> %{customdata}',
-        hoverinfo = "text"
+        hoverinfo = "text",
+        visible=False
         ))
 
     fig.update_coloraxes(showscale=False)
