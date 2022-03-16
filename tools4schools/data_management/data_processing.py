@@ -166,7 +166,7 @@ cps_col_enrl = pd.read_excel((data_dir
 cps_col_enrl = cps_col_enrl[['School ID', 'School Name', 'Enrollment Pct.3']]
 cps_col_enrl['college_enroll_pct'] = (
         cps_col_enrl.loc[~cps_col_enrl['Enrollment Pct.3'].isin([".", "*"]),
-        'Enrollment Pct.3']).astype(float) / 100
+        'Enrollment Pct.3']).astype(float)
 cps_col_enrl['college_enroll_pct'].fillna(999, inplace=True)
 cps_col_enrl['School ID'] = cps_col_enrl['School ID'].astype(str)
 
@@ -293,39 +293,38 @@ scaler_dict = {"teacher_count": 'teachers_certified_fte_crdc',
 ##########FOR CLASS IMPLEMENTATION############
 consolidated.to_csv(out_dir + 'consolidated.csv', index = False)
 ##############################################
+print(consolidated['college_enroll_pct'].head())
+
+# # EXPORT RAW DATA (UNSCALED)
+# indicators_by_school_unscaled = consolidated[id_vars + outcome_var + indicator_lst]
+# indicators_by_school_unscaled.to_csv((out_dir +
+#                                       'indicators_by_school_unscaled.csv'),
+#                                       index = False)
+
+# # SCALE
+# scale_df(consolidated, to_scale_dict, scaler_dict)
+
+# indicators_by_per_unit = consolidated[id_vars + outcome_var + indicator_lst]
+# indicators_by_per_unit.to_csv((out_dir +
+#                                       'indicators_by_school_per_unit.csv'),
+#                                       index = False)
+
+# # IMPUTE MISSING VALUES
+# for var in indicator_lst:
+#     impute_w_mean(consolidated, var)
 
 
 
-# EXPORT RAW DATA (UNSCALED)
-indicators_by_school_unscaled = consolidated[id_vars + outcome_var + indicator_lst]
-indicators_by_school_unscaled.to_csv((out_dir +
-                                      'indicators_by_school_unscaled.csv'),
-                                      index = False)
 
-# SCALE
-scale_df(consolidated, to_scale_dict, scaler_dict)
+# # STANDARDIZE
+# to_std = indicator_lst + outcome_var
+# consolidated[to_std] = StandardScaler().fit_transform(consolidated[to_std])
 
-indicators_by_per_unit = consolidated[id_vars + outcome_var + indicator_lst]
-indicators_by_per_unit.to_csv((out_dir +
-                                      'indicators_by_school_per_unit.csv'),
-                                      index = False)
-
-# IMPUTE MISSING VALUES
-for var in indicator_lst:
-    impute_w_mean(consolidated, var)
-
-
-
-
-# STANDARDIZE
-to_std = indicator_lst + outcome_var
-consolidated[to_std] = StandardScaler().fit_transform(consolidated[to_std])
-
-# EXPORT RAW DATA (SCALED)
-indicators_by_school_scaled = consolidated[id_vars + outcome_var + indicator_lst]
-indicators_by_school_scaled.to_csv((out_dir +
-                                    'indicators_by_school_scaled.csv'),
-                                    index = False)
+# # EXPORT RAW DATA (SCALED)
+# indicators_by_school_scaled = consolidated[id_vars + outcome_var + indicator_lst]
+# indicators_by_school_scaled.to_csv((out_dir +
+#                                     'indicators_by_school_scaled.csv'),
+#                                     index = False)
 
 # CALCULATE INDEX
 #consolidated['opportunity_index'] = consolidated[indicator_lst].mean(axis=1)
