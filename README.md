@@ -73,6 +73,16 @@ Our team is interested in exploring inequity in the Chicago school system. Our g
             - urban_data_import.R
 ```
 
+# Example Tools4Schools App Interaction
+
+1. Toggling through Maps
+   - Toggle to the College Enrollment map, press the ```College Enrollment Percent by School``` button
+   - Hover over the data points to view school name and the Percent college enrollment
+
+2. Filtering by School
+    - Scroll down to the DashTable at the bottom
+    - Type ```Lane``` and press enter to view consolidated opportunity index and indicators for Lane Technical High School
+
 
 
 
