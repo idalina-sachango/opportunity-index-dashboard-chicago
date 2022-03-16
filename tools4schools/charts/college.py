@@ -43,6 +43,7 @@ def make_fig():
         marker_cmax=max(df2["college_enroll_pct"]),
         marker_colorbar=dict(thickness=20),
         marker_colorscale='blues',
+        marker_size=10,
         showlegend=True,
         visible=False))
         
@@ -59,7 +60,8 @@ def make_fig():
         z = census_df["blank_bounds"],
         showscale=False,
         hoverinfo='skip',
-        visible=False
+        visible=False,
+        colorbar_title='College Enrollment Percentage'
     ))
 
     fig.update_geos(fitbounds="locations", visible=False)

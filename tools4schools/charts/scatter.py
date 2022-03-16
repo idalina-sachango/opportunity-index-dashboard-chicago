@@ -68,6 +68,7 @@ def make_fig():
         marker_cmin=1,
         marker_cmax=5,
         marker_colorscale='rdylgn',
+        marker_size=10,
         showlegend=True,
         name=row,
         customdata=df2["opportunity_index"][df2['opportunity_ranked'] == row],

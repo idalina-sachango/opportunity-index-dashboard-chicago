@@ -35,8 +35,6 @@ def make_fig():
     acs = pd.read_csv(data_path_acs.joinpath("acs_data_1.csv"))
     acs = pd.DataFrame(acs)
 
-    print(df2['pov_rate'])
-
 
     acs['pov_rate_cleaned'] = np.select(
         [
@@ -57,7 +55,7 @@ def make_fig():
         lat = df2['latitude'],
         text = df2["school_name"],
         marker_color='white',
-        marker_size=df2['college_enroll_pct'] * 15,
+        marker_size=df2['college_enroll_pct'] * 20,
         showlegend=True,
         visible=False))
         
@@ -76,7 +74,8 @@ def make_fig():
         z = acs['pov_rate_cleaned'],
         showscale=True,
         hoverinfo='skip',
-        visible=False
+        visible=False,
+        colorbar_title='Poverty Rate'
     ))
 
     fig.update_geos(fitbounds="locations", visible=True)
