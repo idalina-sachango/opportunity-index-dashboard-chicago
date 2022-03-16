@@ -10,8 +10,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 #Set directories
-data_dir = "../Data/"
-out_dir = "../Output/"
+data_dir = "../data/"
+out_dir = data_dir + "results/"
 
 id_vars2 = ['School ID', 'School Name', 'ncessch', 'school_id',
     'school_name', 'leaid', 'latitude', 'longitude',

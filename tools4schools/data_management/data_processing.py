@@ -12,8 +12,8 @@ import re
 from sklearn.preprocessing import StandardScaler
 
 #Set directories
-data_dir = "../Data/"
-out_dir = "../Output/"
+data_dir = "../data/"
+out_dir = data_dir + "results/"
 
 # FUNCTIONS
 def is_unique_id(dat, m_var, left_dat):
@@ -134,7 +134,7 @@ cps_cw = cps_cw.add_suffix('_cps')
 
 
 # IMPORT: CCD Directory
-ccd_cw = pd.read_csv(data_dir + "Urban API (from R)/ccd_directory_2017.csv")
+ccd_cw = pd.read_csv(data_dir + "ccd_crdc/ccd_directory_2017.csv")
 ccd_cw['ncessch'] = ccd_cw['ncessch'].astype(str)
 
 # MERGE: CCD Directory and CPS 
@@ -187,7 +187,7 @@ consolidated.groupby(["cps_ccd_cw_merge","cw_not_in_cps_col_enrl"]).size()
 #########################################################################
 
 # IMPORT: CRDC Data
-crdc = pd.read_csv(data_dir + "Urban API (from R)/crdc_data_2017.csv")
+crdc = pd.read_csv(data_dir + "ccd_crdc/crdc_data_2017.csv")
 crdc['ncessch'] = crdc['ncessch'].astype(str)
 
 print(len(crdc['ncessch'].unique()))
@@ -200,7 +200,7 @@ consolidated = pd.merge(consolidated,
 consolidated.rename(columns = {'_merge':'crdc_not_matched'}, inplace = True)
 
 # MERGE: American Community Survey Data
-acs = pd.read_csv(data_dir + 'ACS/acs_data_1.csv')
+acs = pd.read_csv(data_dir + 'acs/acs_data_1.csv')
 process_fips(acs)
 
 print(len(acs['census_tract'].unique()))
@@ -220,7 +220,7 @@ consolidated.rename(columns = {'_merge':'acs_not_matched',
                                'tot_hhld':'tot_hhld_census_tract'}, inplace = True)
 
 # MERGE: School budgets
-cps_budgets = pd.read_csv(data_dir + 'CPS/cps_budgets_2017.csv')
+cps_budgets = pd.read_csv(data_dir + 'cps/cps_budgets_2017.csv')
 consolidated['oracleid_cps'] = consolidated['oracleid_cps'].str.rstrip(".0")
 consolidated = pd.merge(consolidated,
                         cps_budgets[['oracle_id', 'FY 2017 Ending Budget']],
@@ -230,7 +230,7 @@ consolidated = pd.merge(consolidated,
 consolidated.rename(columns = {'_merge':'cps_budget_not_in_cps_col_enrl'}, inplace = True)
 
 # MERGE: Food stamps
-inc_fs = pd.read_csv(data_dir + 'Economic/income_food_stamps.csv')
+inc_fs = pd.read_csv(data_dir + 'economic/income_food_stamps.csv')
 process_fips(inc_fs)
 print(len(inc_fs['census_tract'].unique()))
 print(inc_fs.shape)
@@ -245,7 +245,7 @@ consolidated.rename(columns = {'_merge':'inc_fs_not_matched'}, inplace = True)
 
 
 # MERGE: Air Quality
-aqi = pd.read_csv(data_dir + 'Environmental/chi_air.csv')
+aqi = pd.read_csv(data_dir + 'environmental/chi_air.csv')
 aqi['ctfips'] = aqi['ctfips'].astype(str)
 aqi = aqi.groupby(['ctfips'])['ds_pm_pred'].sum().reset_index()
 
@@ -265,7 +265,7 @@ consolidated.rename(columns = {'_merge':'aqi_not_matched'}, inplace = True)
 
 id_vars = ['School ID', 'School Name', 'ncessch', 'school_id',
     'school_name', 'leaid', 'latitude', 'longitude',
-    'census_tract']
+    'census_tract', 'enrollment_crdc']
 
 outcome_var = ['college_enroll_pct']
 to_scale_dict = {"teacher_count" : ['salaries_crdc'],
