@@ -35,6 +35,7 @@ to_scale_dict = {"teacher_count" : ['salaries_crdc'],
                                 'ds_pm_pred']}
 
 indicator_lst = sum(list(to_scale_dict.values()), [])
+other 
 
 def get_betas(dat, y_var, x_lst):
     '''
