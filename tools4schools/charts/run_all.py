@@ -69,10 +69,10 @@ def run_all():
 
             )
 
-        ]
-
+        ],
+        font = dict(color='#000000')
     )
 
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+    fig.update_layout(template="plotly_white",margin={"r":0,"t":0,"l":0,"b":0}, paper_bgcolor="#ffffff",
     hovermode='x unified')
     return fig

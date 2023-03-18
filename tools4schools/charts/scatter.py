@@ -98,9 +98,9 @@ def make_fig():
     )
 
     fig.update_coloraxes(showscale=False)
-    fig.update_layout(legend_title = "Opportunity Index Rankings")
-
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
-    hovermode='x unified')
+    fig.update_layout(legend_title = "Opportunity Index Rankings", 
+                      margin={"r":0,"t":0,"l":0,"b":0},
+                      hovermode='x unified')
+    # fig.update_layout(template="plotly_dark")
 
     return fig

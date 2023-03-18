@@ -1,11 +1,12 @@
 body {
   font-family: "Lato", sans-serif;
   margin: 0;
-  background-color: #000000;
+  background-color: #FFFFFF;
 }
 
 .header {
-  background-color: #ffffff;
+  background-color: #FFFFFF;
+  color: #FFFFFF;
   height: 100px;
   padding: 8px 0 0 0;
 }
@@ -31,6 +32,28 @@ body {
   max-width: 384px;
 }
 
+h3 {
+  color: #000000;
+  font-size: 25px;
+  font-weight: bold;
+  margin: 0 auto;
+}
+
+.drop {
+  background-color: #ffffff;
+  margin: 0 auto;
+}
+
+.scroll {
+  background-color: #ffffff;
+  margin: 0 auto;
+}
+
+.scatter {
+  background-color: #ffffff;
+  margin: 0 auto;
+}
+
 .wrapper {
   margin-right: auto;
   margin-left: auto;
@@ -43,7 +66,7 @@ body {
 .card {
   margin-top: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
+  /* box-shadow: 0 4px 6px 0 rgba(35, 41, 153, 0.18); */
 }
 
 .menu {
@@ -53,7 +76,7 @@ body {
   justify-content: space-evenly;
   padding-top: 24px;
   margin: -80px auto 0 auto;
-  background-color: #FFFFFF;
+  background-color: #02075d;
   box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
 }
 

@@ -19,17 +19,14 @@ library(educationdata)
 library(tidyverse)
 
 # set directory
-export_dir<- paste0("../../data/ccd_crdc/")
+export_dir <- paste0("../../data/ccd_crdc/")
 
 ###############################################################
 # User-Written Functions
 ###############################################################
 
-# opposite of %in%
-`%notin%` <- Negate(`%in%`)
-
 # Keep variables with a common suffix and rename column names accordingly
-keep_totals_only <- function(df, suffix, id_vars){
+keep_totals_only <- function(df, suffix, id_vars) {
   df <- df %>% select(all_of(id_vars), ends_with(suffix, ignore.case = TRUE))
   colnames(df) <- gsub(paste0("_", suffix), "", colnames(df), ignore.case = TRUE)
   return(df)

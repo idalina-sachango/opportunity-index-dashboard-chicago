@@ -30,4 +30,5 @@ def make_fig():
                         "college_enroll_pct": "College Enrollment (%)",
                         "enrollment_crdc": "Number of Certified Full-time Teachers"
                     })
+    fig.update_layout(template="plotly_white",paper_bgcolor="#ffffff", font = dict(color='#000000'))
     return fig

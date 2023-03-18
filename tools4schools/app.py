@@ -126,33 +126,39 @@ app.layout = html.Div(
             ],
             className="header",
         ),
+        html.Br(),
+        html.Br(),
         html.Div(
             children = [
                 html.Div(
                     children = [
                         dcc.Graph(
                             id = 'Maps',
-                            figure = run_all_fig),],
-                    className="row",),
+                            figure = run_all_fig,
+                            className="maps",)],
+                    className="row1",),
+                html.Br(),
+                html.Br(),
                 html.Div(
                     children=[
                             html.H3("Opportunity Index and College Enrollment for \
                             Chicago High Schools in 2017"),
                             dcc.Graph(
                             id = 'enroll-scatter',
-                            figure = enroll_scatter_fig),],
-                    className="row",
+                            figure = enroll_scatter_fig,
+                            className="scatter",)],
+                    className="row2",
                 ),
-                ],
-        className="row",),
+                ],),
         html.Div(
                 dcc.Dropdown(id='dropdown',
                             options=[{'label': i, 'value': i} \
                                 for i in table_df['school_name'].unique()],
                             multi=True,
                             placeholder='Filter by School name...',),
+                            className="drop",
                                             ),
-        html.Div(id='table-container')
+        html.Div(id='table-container', className="scroll")
     ]
 )
 
